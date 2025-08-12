@@ -5,8 +5,7 @@ dotenv.config();
 
 const TAIGA_API_URL = process.env.TAIGA_API_URL || 'https://taiga.koders.in/api/v1';
 
-// In-memory storage for tokens (in a production app, use a database)
-const userTokens = new Map();
+
 
 export const userLogin = async (req, res) => {
   console.log('Login request received:', { body: req.body });
@@ -44,12 +43,6 @@ export const userLogin = async (req, res) => {
     if (response.status === 200 && response.data.auth_token) {
       const { auth_token, refresh, ...userData } = response.data;
       
-      // Store the token in memory (in production, use a database)
-      userTokens.set(username, {
-        authToken: auth_token,
-        refreshToken: refresh,
-        ...userData
-      });
 
       // Return success response with user data (excluding sensitive info)
       return res.status(200).json({
