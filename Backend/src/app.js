@@ -18,9 +18,9 @@ app.use((req, res, next) => {
 
 // Health check endpoint
 app.get("/health", (req, res) => {
-  res.status(200).json({ 
-    status: "ok", 
-    timestamp: new Date().toISOString() 
+  res.status(200).json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -32,27 +32,27 @@ app.use("/api/taiga", taigaRoute);
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: `Cannot ${req.method} ${req.originalUrl}`
+    message: `Cannot ${req.method} ${req.originalUrl}`,
   });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Global error handler:', err);
-  
+  console.error("Global error handler:", err);
+
   // Handle JSON parse errors
-  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
     return res.status(400).json({
       success: false,
-      message: 'Invalid JSON payload',
-      error: 'Invalid JSON format in request body'
+      message: "Invalid JSON payload",
+      error: "Invalid JSON format in request body",
     });
   }
 
   res.status(500).json({
     success: false,
-    message: 'Internal server error',
-    error: process.env.NODE_ENV === 'development' ? err.message : {}
+    message: "Internal server error",
+    error: process.env.NODE_ENV === "development" ? err.message : {},
   });
 });
 
