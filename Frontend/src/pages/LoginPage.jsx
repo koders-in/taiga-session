@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Clock, Eye, EyeOff, User, Lock, ArrowRight } from "lucide-react";
-import { Register } from "./../api/login.js";
+import { Login } from "./../api/login.js";
 import { useNavigate } from "react-router-dom"; // ✅ Import navigate
 
 const LoginPage = ({ onLogin }) => {
@@ -62,7 +62,7 @@ const LoginPage = ({ onLogin }) => {
       try {
         console.log("Form Data:", formData);
 
-        const response = await Register(formData.username, formData.password);
+        const response = await Login(formData.username, formData.password);
 
         console.log("API Response:", response);
 
