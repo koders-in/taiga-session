@@ -1,9 +1,11 @@
 import axios from "axios";
 
-const TAIGA_API_URL = process.env.TAIGA_API_URL || "https://taiga.koders.in/api/v1";
+const TAIGA_API_URL =
+  process.env.TAIGA_API_URL || "https://taiga.koders.in/api/v1";
 
 // NocoDB Configuration
 const NOCODB_BASE_URL = process.env.nocodb_url;
+
 const NOCODB_USERS_TABLE = process.env.nocodb_table_users;
 const NOCODB_TOKEN = process.env.nocodb_token;
 
@@ -47,21 +49,20 @@ export const userLogin = async (req, res) => {
       // );
 
       // Prepare NocoDB API URL
-      const nocoUsersUrl = `${NOCODB_BASE_URL}/api/v2/tables/${NOCODB_USERS_TABLE}/records`;
-      // // console.log("NocoDB Users URL:", nocoUsersUrl);
+      const nocoUsersUrl = `${NOCODB_BASE_URL}/${NOCODB_USERS_TABLE}/records`;
 
       try {
         // Check if user exists in NocoDB by email or Taiga ID
         const nocoGetRes = await axios.get(nocoUsersUrl, {
           params: {
             where: `(Email,eq,${userData.email})~or(user_id,eq,${userData.id})`,
-            limit: 1
+            limit: 1,
           },
           headers: {
-            'accept': 'application/json',
-            'xc-token': NOCODB_TOKEN,
-            'xc-auth': `Bearer ${NOCODB_TOKEN}`
-          }
+            accept: "application/json",
+            "xc-token": NOCODB_TOKEN,
+            "xc-auth": `Bearer ${NOCODB_TOKEN}`,
+          },
         });
 
         // Check if user exists
@@ -79,7 +80,7 @@ export const userLogin = async (req, res) => {
             Name: userData.full_name || userData.username,
             Email: userData.email,
             Username: userData.username,
-            LastLogin: new Date().toISOString()
+            LastLogin: new Date().toISOString(),
           };
 
           // Add only defined fields to the payload
@@ -91,26 +92,78 @@ export const userLogin = async (req, res) => {
 
           // // console.log("Creating user with payload:", JSON.stringify(newUserPayload, null, 2));
 
-          const nocoCreateRes = await axios.post(
-            nocoUsersUrl,
-            newUserPayload,
-            {
-              headers: {
-                'Content-Type': 'application/json',
-                'accept': 'application/json',
-                'xc-token': NOCODB_TOKEN,
-                'xc-auth': `Bearer ${NOCODB_TOKEN}`
-              }
+          const nocoCreateRes = await axios.post(nocoUsersUrl, newUserPayload, {
+            headers: {
+              "Content-Type": "application/json",
+              accept: "application/json",
+              "xc-token": NOCODB_TOKEN,
+              "xc-auth": `Bearer ${NOCODB_TOKEN}`,
+            },
+          });
+
+          nocoUser = nocoCreateRes.data;
+        } else {
+          // User exists, check if any data has changed and update if necessary
+          const currentData = {
+            Name: userData.full_name || userData.username,
+            Email: userData.email,
+            Username: userData.username,
+            LastLogin: new Date().toISOString(),
+          };
+
+          // Check if any field has changed
+          const hasChanges = Object.entries(currentData).some(
+            ([key, value]) => {
+              return existingUser[key] !== value;
             }
           );
 
-          // // console.log("User created in NocoDB:", nocoCreateRes.data);
-          nocoUser = nocoCreateRes.data;
-        } else {
-          // // console.log("User found in NocoDB:", existingUser);
-          
-          // Use existing user data without updating anything
-          nocoUser = existingUser;
+          if (hasChanges) {
+            // // console.log("User data has changed, updating in NocoDB");
+
+            // Update user in NocoDB
+            const updatePayload = {};
+            Object.entries(currentData).forEach(([key, value]) => {
+              if (value !== undefined && value !== null) {
+                updatePayload[key] = value;
+              }
+            });
+
+            const nocoUpdateRes = await axios.patch(
+              `${nocoUsersUrl}/${existingUser.Id}`,
+              updatePayload,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  accept: "application/json",
+                  "xc-token": NOCODB_TOKEN,
+                  "xc-auth": `Bearer ${NOCODB_TOKEN}`,
+                },
+              }
+            );
+
+            nocoUser = { ...existingUser, ...updatePayload };
+          } else {
+            // No changes, just update LastLogin
+            const updatePayload = {
+              LastLogin: new Date().toISOString(),
+            };
+
+            await axios.patch(
+              `${nocoUsersUrl}/${existingUser.Id}`,
+              updatePayload,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  accept: "application/json",
+                  "xc-token": NOCODB_TOKEN,
+                  "xc-auth": `Bearer ${NOCODB_TOKEN}`,
+                },
+              }
+            );
+
+            nocoUser = { ...existingUser, ...updatePayload };
+          }
         }
 
         return res.status(200).json({
