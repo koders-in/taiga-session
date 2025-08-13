@@ -8,7 +8,7 @@ const TAIGA_API_URL = process.env.TAIGA_API_URL || 'https://taiga.koders.in/api/
 
 
 export const userLogin = async (req, res) => {
-  console.log('Login request received:', { body: req.body });
+  // console.log('Login request received:', { body: req.body });
   
   try {
     const { username, password } = req.body;
@@ -29,7 +29,7 @@ export const userLogin = async (req, res) => {
       password: password
     };
 
-    console.log('Sending request to Taiga API:', { url: `${TAIGA_API_URL}/auth` });
+    // console.log('Sending request to Taiga API:', { url: `${TAIGA_API_URL}/auth` });
     
     // Make request to Taiga API
     const response = await axios.post(`${TAIGA_API_URL}/auth`, loginPayload, {
@@ -53,6 +53,7 @@ export const userLogin = async (req, res) => {
           username: userData.username,
           full_name: userData.full_name,
           photo: userData.photo,
+          email: userData.email,
           // Add other non-sensitive user data as needed
         },
         // In production, consider using HTTP-only cookies for tokens
