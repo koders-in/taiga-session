@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 
-export default function PomodoroTimer({ task, category, onSessionComplete }) {
+export default function PomodoroTimer({
+  task,
+  category,
+  onSessionComplete,
+  isDarkMode = true,
+}) {
   const WORK_DEFAULT = 25 * 60;
   const [secondsLeft, setSecondsLeft] = useState(WORK_DEFAULT);
   const [running, setRunning] = useState(false);
@@ -49,8 +54,35 @@ export default function PomodoroTimer({ task, category, onSessionComplete }) {
   // Calculate progress percentage for the circular progress
   const progress = ((WORK_DEFAULT - secondsLeft) / WORK_DEFAULT) * 100;
 
+  // Theme-based styles
+  const themeStyles = {
+    container: isDarkMode
+      ? "bg-slate-800 border-slate-700 text-white"
+      : "bg-white border-gray-200 text-gray-900 shadow-xl",
+    taskDisplay: isDarkMode
+      ? "bg-slate-700/50 border-slate-600"
+      : "bg-gray-50 border-gray-200",
+    taskTitle: isDarkMode ? "text-white" : "text-gray-900",
+    taskCategory: isDarkMode ? "text-slate-500" : "text-gray-500",
+    taskLabel: isDarkMode ? "text-slate-400" : "text-gray-600",
+    timerText: isDarkMode ? "text-white" : "text-gray-900",
+    statusText: isDarkMode ? "text-slate-400" : "text-gray-600",
+    circleBackground: isDarkMode ? "rgb(71 85 105)" : "rgb(229 231 235)", // slate-600 : gray-200
+    resetButton: isDarkMode
+      ? "bg-slate-700 hover:bg-slate-600 border-slate-600 text-slate-300 focus:ring-slate-500"
+      : "bg-gray-200 hover:bg-gray-300 border-gray-300 text-gray-700 focus:ring-gray-400",
+    statsContainer: isDarkMode
+      ? "bg-slate-700/30 border-slate-600"
+      : "bg-gray-50 border-gray-200",
+    statsLabel: isDarkMode ? "text-slate-400" : "text-gray-600",
+    statsValue: isDarkMode ? "text-white" : "text-gray-900",
+    progressBarBg: isDarkMode ? "bg-slate-600" : "bg-gray-200",
+  };
+
   return (
-    <div className="bg-slate-800 border border-slate-700 p-8 rounded-lg flex flex-col items-center shadow-lg">
+    <div
+      className={`${themeStyles.container} border p-8 rounded-lg flex flex-col items-center shadow-lg`}
+    >
       {/* Header with icon */}
       <div className="flex items-center gap-3 mb-6">
         <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
@@ -62,15 +94,23 @@ export default function PomodoroTimer({ task, category, onSessionComplete }) {
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
           </svg>
         </div>
-        <h3 className="text-white text-xl font-semibold">Pomodoro Timer</h3>
+        <h3 className={`${themeStyles.timerText} text-xl font-semibold`}>
+          Pomodoro Timer
+        </h3>
       </div>
 
       {/* Current task display */}
       {task && (
-        <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4 mb-6 w-full text-center">
-          <div className="text-sm text-slate-400 mb-1">Current Task</div>
-          <div className="text-white font-medium">{task.name}</div>
-          <div className="text-xs text-slate-500 mt-1">
+        <div
+          className={`${themeStyles.taskDisplay} border rounded-lg p-4 mb-6 w-full text-center`}
+        >
+          <div className={`text-sm ${themeStyles.taskLabel} mb-1`}>
+            Current Task
+          </div>
+          <div className={`${themeStyles.taskTitle} font-medium`}>
+            {task.name}
+          </div>
+          <div className={`text-xs ${themeStyles.taskCategory} mt-1`}>
             {category || task.category}
           </div>
         </div>
@@ -88,7 +128,7 @@ export default function PomodoroTimer({ task, category, onSessionComplete }) {
             cy="50"
             r="45"
             fill="none"
-            stroke="rgb(71 85 105)" // slate-600
+            stroke={themeStyles.circleBackground}
             strokeWidth="4"
             className="opacity-30"
           />
@@ -109,10 +149,10 @@ export default function PomodoroTimer({ task, category, onSessionComplete }) {
 
         {/* Timer display */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="text-5xl font-bold text-white mb-2">
+          <div className={`text-5xl font-bold ${themeStyles.timerText} mb-2`}>
             {format(secondsLeft)}
           </div>
-          <div className="text-sm text-slate-400">
+          <div className={`text-sm ${themeStyles.statusText}`}>
             {running ? (
               <span className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -155,7 +195,7 @@ export default function PomodoroTimer({ task, category, onSessionComplete }) {
       {/* Secondary Action Buttons */}
       <div className="flex gap-3 w-full">
         <button
-          className="flex-1 bg-slate-700 hover:bg-slate-600 border border-slate-600 text-slate-300 py-3 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500"
+          className={`flex-1 ${themeStyles.resetButton} border py-3 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2`}
           onClick={reset}
         >
           <span className="flex items-center justify-center gap-2">
@@ -180,12 +220,18 @@ export default function PomodoroTimer({ task, category, onSessionComplete }) {
       </div>
 
       {/* Timer Statistics */}
-      <div className="mt-6 w-full bg-slate-700/30 border border-slate-600 rounded-lg p-4">
+      <div
+        className={`mt-6 w-full ${themeStyles.statsContainer} border rounded-lg p-4`}
+      >
         <div className="flex justify-between items-center text-sm">
-          <div className="text-slate-400">Session Progress</div>
-          <div className="text-white font-medium">{Math.round(progress)}%</div>
+          <div className={themeStyles.statsLabel}>Session Progress</div>
+          <div className={`${themeStyles.statsValue} font-medium`}>
+            {Math.round(progress)}%
+          </div>
         </div>
-        <div className="mt-2 w-full bg-slate-600 rounded-full h-2">
+        <div
+          className={`mt-2 w-full ${themeStyles.progressBarBg} rounded-full h-2`}
+        >
           <div
             className="bg-red-500 h-2 rounded-full transition-all duration-1000 ease-linear"
             style={{ width: `${progress}%` }}
