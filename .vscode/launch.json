@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run All Servers",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/index.js", // Dummy file to satisfy Node debugger
+      "preLaunchTask": "Start All Servers",
+      "postDebugTask": "",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
+}

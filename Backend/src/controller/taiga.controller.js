@@ -36,18 +36,12 @@ const makeTaigaRequest = async (token, method, endpoint, data = null) => {
 
 export const getUserProjects = async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "Authentication token is required",
-      });
-    }
+    // Get token from the authenticated request
+    const token = req.token;
+    // Get user info from the authenticated request
+    const user = req.user;
 
-    // First get user info to get user ID
-    const user = await makeTaigaRequest(token, "get", "/users/me");
-
-    // Then get projects where user is a member
+    // Get projects where user is a member
     const projects = await makeTaigaRequest(
       token,
       "get",
@@ -81,14 +75,9 @@ export const getUserProjects = async (req, res) => {
 export const getProjectTasks = async (req, res) => {
   try {
     const { projectId } = req.params;
-    const token = req.headers.authorization?.split(" ")[1];
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "Authentication token is required",
-      });
-    }
+    // Get token and user from the authenticated request
+    const token = req.token;
+    const user = req.user;
 
     if (!projectId) {
       return res.status(400).json({
@@ -96,9 +85,6 @@ export const getProjectTasks = async (req, res) => {
         message: "Project ID is required",
       });
     }
-
-    // Get user info to filter tasks assigned to this user
-    const user = await makeTaigaRequest(token, "get", "/users/me");
 
     // Get tasks assigned to the user in this project
     const tasks = await makeTaigaRequest(

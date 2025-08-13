@@ -3,22 +3,11 @@ import {
   getUserProjects,
   getProjectTasks,
 } from "../controller/taiga.controller.js";
+import { authenticate } from "../middleware/auth.js";
 
 const router = Router();
 
-// Middleware to check authentication
-const authenticate = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({
-      success: false,
-      message: "Authentication required. Please provide a valid token.",
-    });
-  }
-  next();
-};
-
-// Apply authentication middleware to all routes
+// Apply centralized authentication middleware to all routes
 router.use(authenticate);
 
 // Get all projects for the authenticated user
