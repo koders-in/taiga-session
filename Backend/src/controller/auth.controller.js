@@ -4,10 +4,15 @@ const TAIGA_API_URL =
   process.env.TAIGA_API_URL || "https://taiga.koders.in/api/v1";
 
 // NocoDB Configuration
-const NOCODB_BASE_URL = process.env.nocodb_url;
+const NOCODB_BASE_URL = process.env.nocodb_url || 'http://localhost:8080';
+const NOCODB_USERS_TABLE = process.env.nocodb_table_users || 'mo90o7onz2d8oh1';
+const NOCODB_TOKEN = process.env.nocodb_token || 'QEHwKlBURkmRZ2oTTBgoNSLJg3Yn1bSXDXc3vPzY';
 
-const NOCODB_USERS_TABLE = process.env.nocodb_table_users;
-const NOCODB_TOKEN = process.env.nocodb_token;
+// Validate required environment variables
+if (!NOCODB_BASE_URL || !NOCODB_USERS_TABLE || !NOCODB_TOKEN) {
+  console.error('Error: Missing required NocoDB configuration in environment variables');
+  process.exit(1);
+}
 
 export const userLogin = async (req, res) => {
   try {
@@ -48,8 +53,8 @@ export const userLogin = async (req, res) => {
       //   userData.email
       // );
 
-      // Prepare NocoDB API URL
-      const nocoUsersUrl = `${NOCODB_BASE_URL}/${NOCODB_USERS_TABLE}/records`;
+      // Prepare NocoDB API URL with correct base path
+      const nocoUsersUrl = `${NOCODB_BASE_URL}/api/v2/tables/${NOCODB_USERS_TABLE}/records`;
 
       try {
         // Check if user exists in NocoDB by email or Taiga ID

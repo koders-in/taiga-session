@@ -280,7 +280,7 @@ export const startTimer = async (req, res) => {
       task_id: taskId,
       session_type: sessionType,
       start_time: startTime,
-      duration_minutes: duration_minutes || 25, // Default to 25 minutes for pomodoro
+      duration_minutes: 0,  // Default to 0 as session starts // later calculated
       status: 'Started',
       interrupted: false
     });
