@@ -8,14 +8,19 @@ import { logout } from "../api/login";
 
 export default function PomodoroTimerPage({}) {
   const [userEmail, setUserEmail] = useState("");
+  const [userPhoto, setUserPhoto] = useState("");
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(true);
 
   useEffect(() => {
   const email = localStorage.getItem("email");
+  const photo = localStorage.getItem("photo"); 
   if (email) {
     setUserEmail(email);
+  }
+  if (photo) {
+    setUserPhoto(photo); 
   }
 }, []);
 
@@ -74,6 +79,14 @@ export default function PomodoroTimerPage({}) {
           >
             {userEmail && <p>{userEmail}</p>}
           </span>
+          
+        {userPhoto && (
+          <img
+          src={userPhoto}
+          alt="User avatar"
+          className="w-8 h-8 rounded-full object-cover border border-gray-300"
+          />
+            )}
           <button
             onClick={toggleTheme}
             className={`p-2 rounded-full ${themeClasses.button.logout} transition-colors`}
