@@ -14,15 +14,15 @@ export default function PomodoroTimerPage({}) {
   const [isDarkMode, setIsDarkMode] = useState(true);
 
   useEffect(() => {
-  const email = localStorage.getItem("email");
-  const photo = localStorage.getItem("photo"); 
-  if (email) {
-    setUserEmail(email);
-  }
-  if (photo) {
-    setUserPhoto(photo); 
-  }
-}, []);
+    const email = localStorage.getItem("email");
+    const photo = localStorage.getItem("photo");
+    if (email) {
+      setUserEmail(email);
+    }
+    if (photo) {
+      setUserPhoto(photo);
+    }
+  }, []);
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -79,14 +79,14 @@ export default function PomodoroTimerPage({}) {
           >
             {userEmail && <p>{userEmail}</p>}
           </span>
-          
-        {userPhoto && (
-          <img
-          src={userPhoto}
-          alt="User avatar"
-          className="w-8 h-8 rounded-full object-cover border border-gray-300"
-          />
-            )}
+
+          {userPhoto && (
+            <img
+              src={userPhoto}
+              alt="User avatar"
+              className="w-8 h-8 rounded-full object-cover border border-gray-300"
+            />
+          )}
           <button
             onClick={toggleTheme}
             className={`p-2 rounded-full ${themeClasses.button.logout} transition-colors`}
@@ -132,9 +132,7 @@ export default function PomodoroTimerPage({}) {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div
                 className={`text-lg font-semibold ${themeClasses.text.primary}`}
-              >
-                Task 2o arch
-              </div>
+              ></div>
               <div className="flex flex-col sm:flex-row gap-3">
                 <TaskSelector
                   selectedTask={selectedTask}

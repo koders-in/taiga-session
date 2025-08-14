@@ -174,10 +174,10 @@ export default function PomodoroTimer({
         } focus:outline-none shadow-lg`}
         onClick={() => {
           if (task && category) {
-          running ? pause() : start();
+            running ? pause() : start();
           }
         }}
-          disabled={(!task || !category) && !running}
+        disabled={(!task || !category) && !running}
       >
         {running ? (
           <span className="flex items-center justify-center gap-2">
