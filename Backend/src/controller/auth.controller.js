@@ -77,10 +77,8 @@ export const userLogin = async (req, res) => {
           const newUserPayload = {};
           const fields = {
             user_id: userData.id,
-            Name: userData.full_name || userData.username,
+            Name: userData.full_name,
             Email: userData.email,
-            Username: userData.username,
-            LastLogin: new Date().toISOString(),
           };
 
           // Add only defined fields to the payload
@@ -91,78 +89,50 @@ export const userLogin = async (req, res) => {
           });
 
           // // console.log("Creating user with payload:", JSON.stringify(newUserPayload, null, 2));
-
           const nocoCreateRes = await axios.post(nocoUsersUrl, newUserPayload, {
             headers: {
               "Content-Type": "application/json",
               accept: "application/json",
               "xc-token": NOCODB_TOKEN,
-              "xc-auth": `Bearer ${NOCODB_TOKEN}`,
             },
           });
 
           nocoUser = nocoCreateRes.data;
         } else {
-          // User exists, check if any data has changed and update if necessary
-          const currentData = {
-            Name: userData.full_name || userData.username,
-            Email: userData.email,
-            Username: userData.username,
-            LastLogin: new Date().toISOString(),
-          };
-
-          // Check if any field has changed
-          const hasChanges = Object.entries(currentData).some(
-            ([key, value]) => {
-              return existingUser[key] !== value;
-            }
-          );
-
+          // Check if user data has changed
+          const hasChanges = 
+            existingUser.Name !== userData.full_name ||
+            existingUser.Email !== userData.email;
+          
           if (hasChanges) {
-            // // console.log("User data has changed, updating in NocoDB");
-
-            // Update user in NocoDB
-            const updatePayload = {};
-            Object.entries(currentData).forEach(([key, value]) => {
-              if (value !== undefined && value !== null) {
-                updatePayload[key] = value;
-              }
-            });
-
-            const nocoUpdateRes = await axios.patch(
-              `${nocoUsersUrl}/${existingUser.Id}`,
-              updatePayload,
-              {
-                headers: {
-                  "Content-Type": "application/json",
-                  accept: "application/json",
-                  "xc-token": NOCODB_TOKEN,
-                  "xc-auth": `Bearer ${NOCODB_TOKEN}`,
-                },
-              }
-            );
-
-            nocoUser = { ...existingUser, ...updatePayload };
-          } else {
-            // No changes, just update LastLogin
+            console.log(`User data changed for ${userData.email}. Updating record.`);
             const updatePayload = {
-              LastLogin: new Date().toISOString(),
+              Name: userData.full_name,
+              Email: userData.email
             };
 
-            await axios.patch(
-              `${nocoUsersUrl}/${existingUser.Id}`,
-              updatePayload,
-              {
-                headers: {
-                  "Content-Type": "application/json",
-                  accept: "application/json",
-                  "xc-token": NOCODB_TOKEN,
-                  "xc-auth": `Bearer ${NOCODB_TOKEN}`,
-                },
-              }
-            );
-
-            nocoUser = { ...existingUser, ...updatePayload };
+            try {
+              await axios.patch(
+                `${nocoUsersUrl}/${existingUser.Id}`,
+                updatePayload,
+                {
+                  headers: {
+                    "Content-Type": "application/json",
+                    accept: "application/json",
+                    "xc-token": NOCODB_TOKEN,
+                  },
+                }
+              );
+              nocoUser = { ...existingUser, ...updatePayload };
+              console.log(`Successfully updated user ${userData.email}`);
+            } catch (updateError) {
+              console.error(`Failed to update user ${userData.email}:`, updateError);
+              // Continue with existing user data if update fails
+              nocoUser = existingUser;
+            }
+          } else {
+            console.log(`No changes detected for user ${userData.email}. Skipping update.`);
+            nocoUser = existingUser;
           }
         }
 
@@ -171,7 +141,6 @@ export const userLogin = async (req, res) => {
           message: "Login successful",
           user: {
             id: userData.id,
-            username: userData.username,
             full_name: userData.full_name,
             photo: userData.photo,
             email: userData.email,
@@ -189,7 +158,6 @@ export const userLogin = async (req, res) => {
           message: "Login successful (NocoDB sync failed)",
           user: {
             id: userData.id,
-            username: userData.username,
             full_name: userData.full_name,
             photo: userData.photo,
             email: userData.email,
