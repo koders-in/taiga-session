@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getToken } from "../api/login";
+import { fetchProjects, fetchTasksByProject } from "../api/task";
 
 export default function TaskSelector({
   selectedTask,
@@ -12,42 +12,33 @@ export default function TaskSelector({
   const [tasks, setTasks] = useState([]);
 
   const categories = [
-    { id: 1, name: "Backend" },
-    { id: 2, name: "Frontend" },
-    { id: 2, name: "Full Stack" },
-    { id: 2, name: "Api Development" },
-    { id: 2, name: "Data Science" },
+    { id: 1, name: "Planning & Requirements" },
+    { id: 2, name: "Design & Prototyping" },
+    { id: 3, name: "Frontend Development" },
+    { id: 4, name: "Backend Development" },
+    { id: 5, name: "DevOps & Deployment" },
+    { id: 5, name: "Testing & QA" },
+    { id: 5, name: "Documentation & Knowledge Baset" },
+    { id: 5, name: "Stakeholder/Client/Team Communicationt" },
+    { id: 5, name: "HR & Administration" },
+    { id: 5, name: "Support & Maintenance" }
   ];
-
-  const token = getToken();
 
   // Fetch projects
   useEffect(() => {
-    if (!token) return;
-
-    fetch("http://localhost:4000/api/taiga/projects", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setProjects(data.data);
-      })
-      .catch((err) => console.error("Error fetching projects:", err));
-  }, [token]);
+    fetchProjects().then((data) => {
+      if (data.success) setProjects(data.data);
+    });
+  }, []);
 
   // Fetch tasks for selected project
   useEffect(() => {
-    if (!token || !selectedProject) return;
+    if (!selectedProject) return;
 
-    fetch(`http://localhost:4000/api/taiga/projects/${selectedProject}/tasks`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setTasks(data.data);
-      })
-      .catch((err) => console.error("Error fetching tasks:", err));
-  }, [selectedProject, token]);
+    fetchTasksByProject(selectedProject).then((data) => {
+      if (data.success) setTasks(data.data);
+    });
+  }, [selectedProject]);
 
   return (
     <div className="flex gap-3 items-center">
@@ -103,3 +94,4 @@ export default function TaskSelector({
     </div>
   );
 }
+

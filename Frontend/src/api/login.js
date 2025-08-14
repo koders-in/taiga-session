@@ -22,14 +22,18 @@ export const Login = async (username, password) => {
       password,
     });
 
-    const { token, message, refreshtoken } = res.data; // return backend response
+    const { token, message, refreshtoken, user } = res.data;
+    const email = user?.email || null; // return backend response
     if (token) {
       setAuthToken(token);
-    } else {
+      if (email) localStorage.setItem("email", email); 
+    } 
+    else {
       console.warn("No token received from the backend");
     }
+    
     console.log({ token });
-    return { message, refreshtoken };
+   return { message, refreshtoken, email };
   } catch (error) {
     console.error("API Error:", error.response?.data || error.message);
     throw error;

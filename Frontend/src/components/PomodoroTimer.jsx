@@ -172,8 +172,12 @@ export default function PomodoroTimer({
             ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
             : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
         } focus:outline-none shadow-lg`}
-        onClick={() => (running ? pause() : start())}
-        // disabled={!task && !running} TODO: Enable when task is selected
+        onClick={() => {
+          if (task && category) {
+          running ? pause() : start();
+          }
+        }}
+          disabled={(!task || !category) && !running}
       >
         {running ? (
           <span className="flex items-center justify-center gap-2">

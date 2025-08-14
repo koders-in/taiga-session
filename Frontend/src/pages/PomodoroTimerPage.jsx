@@ -4,7 +4,6 @@ import PomodoroTimer from "../components/PomodoroTimer";
 import TaskSelector from "../components/TaskSelector";
 import PerDayWork from "../components/PerDayWork";
 import SessionLog from "../components/SessionLog";
-import { getUserProfile } from "../api/login";
 import { logout } from "../api/login";
 
 export default function PomodoroTimerPage({}) {
@@ -14,18 +13,11 @@ export default function PomodoroTimerPage({}) {
   const [isDarkMode, setIsDarkMode] = useState(true);
 
   useEffect(() => {
-    getUserProfile()
-      .then((profile) => {
-        if (profile.email) {
-          setUserEmail(profile.email);
-        } else {
-          console.warn("Email not found:", profile);
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching user profile:", err);
-      });
-  }, []);
+  const email = localStorage.getItem("email");
+  if (email) {
+    setUserEmail(email);
+  }
+}, []);
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
