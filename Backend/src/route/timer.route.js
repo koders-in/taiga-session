@@ -3,7 +3,8 @@ import {
   startTimer, 
   pauseTimer, 
   resumeTimer, 
-  completeTimer 
+  completeTimer,
+  resetTimer 
 } from '../controller/timer.controller.js';
 import { authenticate } from '../middleware/auth.js';
 
@@ -47,5 +48,14 @@ router.post('/resume/:sessionId', resumeTimer);
  * @header  {string} Authorization - Bearer token for authentication
  */
 router.post('/complete/:sessionId', completeTimer);
+
+/**
+ * @route   POST /api/timer/reset/:sessionId
+ * @desc    Reset a timer session (cancel without saving progress)
+ * @access  Private
+ * @param   {string} sessionId - ID of the session to reset
+ * @header  {string} Authorization - Bearer token for authentication
+ */
+router.post('/reset/:sessionId', resetTimer);
 
 export default router;
