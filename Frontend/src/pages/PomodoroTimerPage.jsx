@@ -116,7 +116,8 @@ export default function PomodoroTimerPage({}) {
         {/* Left: Pomodoro Timer card */}
         <div className="xl:col-span-1">
           <PomodoroTimer
-            task={selectedTask}
+            taskId={selectedTask?.id} 
+            taskName={selectedTask?.subject} 
             category={selectedCategory}
             isDarkMode={isDarkMode}
             onSessionComplete={() => {
