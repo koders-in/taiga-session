@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from "react";
+import { startTimer, pauseTimer, resumeTimer, completeTimer } from "../api/timer";
 
 export default function PomodoroTimer({
-  task,
+  taskId,
+  taskName,
   category,
   onSessionComplete,
   isDarkMode = true,
 }) {
+  const task = { id: taskId, name: taskName };
   const WORK_DEFAULT = 25 * 60;
   const [secondsLeft, setSecondsLeft] = useState(WORK_DEFAULT);
   const [running, setRunning] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     let interval;
@@ -23,25 +28,92 @@ export default function PomodoroTimer({
     return () => clearInterval(interval);
   }, [running, secondsLeft, onSessionComplete]);
 
-  const start = () => {
-    console.log("run");
-    setRunning(true);
-  };
+const start = async () => {
+  if (!task?.id || !(task.name || task.subject) || !category) {
+    console.warn("Please select both task and category before starting.");
+    return;
+  }
 
-  const pause = () => {
-    setRunning(false);
-  };
+  try {
+    const res = await startTimer(task.id, task.name || task.subject);
+    const sid =
+      res?.sessionId ||
+      res?.session_id ||
+      res?.data?.sessionId ||
+      res?.data?.session_id;
+
+    if (res?.success && sid) {
+      setSessionId(sid);
+      setRunning(true);
+      setIsPaused(false);
+      setSecondsLeft(WORK_DEFAULT);
+    } else {
+      console.error("Start timer failed:", res);
+    }
+  } catch (err) {
+    console.error("Error starting timer:", err);
+  }
+};
+
+
+
+  const pause = async () => {
+  if (!sessionId) return;
+  try {
+    const res = await pauseTimer(sessionId);
+    if (res?.success) {
+      setRunning(false);
+      setIsPaused(true);
+    } else {
+      console.error("Pause timer failed:", res);
+    }
+  } catch (err) {
+    console.error("Error pausing timer:", err);
+  }
+};
+
+
+
+  const resume = async () => {
+  if (!sessionId) return;
+  try {
+    const res = await resumeTimer(sessionId);
+    if (res?.success) {
+      setRunning(true);
+      setIsPaused(false);
+    } else {
+      console.error("Resume timer failed:", res);
+    }
+  } catch (err) {
+    console.error("Error resuming timer:", err);
+  }
+};
+
 
   const reset = () => {
     setRunning(false);
     setSecondsLeft(WORK_DEFAULT);
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+  try {
+    if (sessionId) {
+      const res = await completeTimer(sessionId);
+      if (!res?.success) {
+        console.error("Complete timer failed:", res);
+      }
+    }
+  } catch (err) {
+    console.error("Error completing timer:", err);
+  } finally {
     setRunning(false);
+    setIsPaused(false);
     setSecondsLeft(WORK_DEFAULT);
+    setSessionId(null);
     if (onSessionComplete) onSessionComplete();
-  };
+  }
+};
+
 
   const format = (sec) => {
     const m = Math.floor(sec / 60)
@@ -158,12 +230,28 @@ export default function PomodoroTimer({
             ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
             : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
         } focus:outline-none shadow-lg`}
-        onClick={() => {
-          if (task && category) {
-            running ? pause() : start();
-          }
-        }}
-        disabled={(!task || !category) && !running}
+        
+       onClick={() => {
+      // Debug logs
+      console.log("taskId prop:", taskId);
+      console.log("taskName prop:", taskName);
+      console.log("category prop:", category);
+      console.log("running:", running);
+      console.log("isPaused:", isPaused);
+
+      console.log("Task:", task);
+      console.log("Category:", category);
+
+     if (!taskId || !taskName || !category)  {
+        console.warn("Task or category missing!");
+        return;
+      }
+
+      if (running) pause();
+      else if (isPaused) resume();
+      else start();
+    }}
+        disabled={(!taskId || !category) && !running}
       >
         {running ? (
           <span className="flex items-center justify-center gap-2">
@@ -171,6 +259,13 @@ export default function PomodoroTimer({
               <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
             </svg>
             Pause
+             </span>
+      ) : isPaused ? (
+        <span className="flex items-center justify-center gap-2">
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        <path d="m7 4 10 6L7 16V4z" />
+    </svg>
+    Resume
           </span>
         ) : (
           <span className="flex items-center justify-center gap-2">
