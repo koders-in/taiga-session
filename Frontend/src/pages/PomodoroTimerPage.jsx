@@ -69,7 +69,7 @@ export default function PomodoroTimerPage({}) {
             </svg>
           </div>
           <h1 className={`text-2xl font-bold ${themeClasses.text.primary}`}>
-            Pomodoro Timer
+            Taiga Session
           </h1>
         </div>
 
