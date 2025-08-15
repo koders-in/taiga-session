@@ -27,8 +27,17 @@ export const Login = async (username, password) => {
     const photo = user?.photo || null;
     if (token) {
       setAuthToken(token);
-      if (email) localStorage.setItem("email", email);
-      if (photo) localStorage.setItem("photo", photo); 
+      if (email) {
+        localStorage.setItem("email", email);
+      } else {
+        localStorage.removeItem("email");
+      }
+
+      if (photo) {
+        localStorage.setItem("photo", photo);
+      } else {
+        localStorage.removeItem("photo"); 
+      } 
     } 
     else {
       console.warn("No token received from the backend");

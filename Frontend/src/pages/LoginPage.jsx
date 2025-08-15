@@ -109,7 +109,7 @@ const LoginPage = ({ onLogin }) => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-red-500 rounded-full mb-4">
             <Clock className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Pomodoro Timer</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">Taiga Session</h1>
           <p className="text-gray-400">
             Track your productivity with focused work sessions
           </p>
@@ -223,23 +223,7 @@ const LoginPage = ({ onLogin }) => {
               )}
             </div>
 
-            {/* Remember Me / Forgot Password */}
-            <div className="flex items-center justify-between">
-              <label className="flex items-center text-gray-300 text-sm">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 text-red-500 bg-gray-700 border-gray-600 rounded focus:ring-red-500"
-                />
-                <span className="ml-2">Remember me</span>
-              </label>
-              <a
-                href="#"
-                className="text-sm text-red-400 hover:text-red-300 transition-colors"
-              >
-                Forgot password?
-              </a>
-            </div>
-
+          
             {/* Submit Button */}
             <button
               type="submit"
@@ -273,46 +257,7 @@ const LoginPage = ({ onLogin }) => {
           </div>
         </form>
 
-        {/* Features Preview */}
-        <div className="mt-8 text-center">
-          <div className="grid grid-cols-3 gap-4 text-sm">
-            <div className="text-gray-400">
-              <div className="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center mx-auto mb-2">
-                <Clock className="w-4 h-4 text-red-400" />
-              </div>
-              Focus Sessions
-            </div>
-            <div className="text-gray-400">
-              <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center mx-auto mb-2">
-                <svg
-                  className="w-4 h-4 text-blue-400"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
-                  <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
-                </svg>
-              </div>
-              Analytics
-            </div>
-            <div className="text-gray-400">
-              <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center mx-auto mb-2">
-                <svg
-                  className="w-4 h-4 text-green-400"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              Task Tracking
-            </div>
-          </div>
-        </div>
+      
       </div>
     </div>
   );

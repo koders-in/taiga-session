@@ -50,7 +50,7 @@ export default function TaskSelector({
           setTasks([]);
           onTaskChange && onTaskChange(null);
         }}
-        className="bg-gray-700/60 text-white p-2 rounded border border-white/10 w-[180px]"
+        className="bg-gray-800/90 text-white p-2 rounded border border-white/10 w-[180px]"
       >
         <option value="">Select a project</option>
         {projects.map((p) => (
@@ -67,7 +67,7 @@ export default function TaskSelector({
           const t = tasks.find((x) => String(x.id) === e.target.value) || null;
           onTaskChange && onTaskChange(t);
         }}
-        className="bg-gray-700/60 text-white p-2 rounded border border-white/10 w-[220px]"
+        className="bg-gray-800/90 text-white p-2 rounded border border-white/10 w-[180px]"
         disabled={!selectedProject}
       >
         <option value="">Select a task</option>
@@ -82,7 +82,7 @@ export default function TaskSelector({
       <select
         value={selectedCategory || ""}
         onChange={(e) => onCategoryChange && onCategoryChange(e.target.value)}
-        className="bg-gray-700/60 text-white p-2 rounded border border-white/10 w-[180px]"
+        className="bg-gray-800/90 text-white p-2 rounded border  border-white/10 w-[180px]"
       >
         <option value="">Select a category</option>
         {categories.map((c) => (
