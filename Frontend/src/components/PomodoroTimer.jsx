@@ -224,24 +224,6 @@ export default function PomodoroTimer({
       </div>
 
       {/* Timer Statistics */}
-      <div
-        className={`mt-6 w-full ${themeStyles.statsContainer} border rounded-lg p-4`}
-      >
-        <div className="flex justify-between items-center text-sm">
-          <div className={themeStyles.statsLabel}>Session Progress</div>
-          <div className={`${themeStyles.statsValue} font-medium`}>
-            {Math.round(progress)}%
-          </div>
-        </div>
-        <div
-          className={`mt-2 w-full ${themeStyles.progressBarBg} rounded-full h-2`}
-        >
-          <div
-            className="bg-red-500 h-2 rounded-full transition-all duration-1000 ease-linear"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      </div>
     </div>
   );
 }
