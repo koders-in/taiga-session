@@ -5,8 +5,6 @@ const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 export async function sendDiscordMessage(content, embedData = null) {
   try {
     const payload = {
-      username: "Action Twayo ✅", // Bot display name
-      avatar_url: "https://i.imgur.com/F9Xn8h3.png", // Bot avatar
       content: content,
     };
 
