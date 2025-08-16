@@ -25,6 +25,7 @@ export const Login = async (username, password) => {
     const { token, message, refreshtoken, user } = res.data;
     const email = user?.email || null; // return backend response
     const photo = user?.photo || null;
+    const name = user?.full_name;
     if (token) {
       setAuthToken(token);
       if (email) {
@@ -38,8 +39,12 @@ export const Login = async (username, password) => {
       } else {
         localStorage.removeItem("photo");
       }
-    }
-    else {
+      if (name) {
+        localStorage.setItem("name", name);
+      } else {
+        localStorage.removeItem("name");
+      }
+    } else {
       console.warn("No token received from the backend");
     }
 

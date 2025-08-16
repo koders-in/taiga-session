@@ -224,8 +224,9 @@ const updateSessionRecord = async (sessionData) => {
 export const startTimer = async (req, res) => {
   try {
     // Get task details from frontend
-    const { task_Id, task_Name, category, duration_minutes } = req.body;
-
+    const { task_Id, task_Name, category, duration_minutes, name } = req.body;
+    console.log("Wrokringssssssssssssssssssssssssssssssssssssssssssss");
+    console.log(name);
     // Get user ID from the authenticated user
     const userId = req.user.id;
 
@@ -259,11 +260,11 @@ export const startTimer = async (req, res) => {
     const sessionId = uuidv4();
     const startTime = new Date().toISOString();
 
-    console.log(`Creating new task for user ${userId}:`, {
-      task_Id,
-      task_Name,
-      startTime,
-    });
+    // console.log(`Creating new task for user ${userId}:`, {
+    //   task_Id,
+    //   task_Name,
+    //   startTime,
+    // });
 
     // Create task in NocoDB
     const taskResult = await createTaskRecord({
@@ -316,12 +317,20 @@ export const startTimer = async (req, res) => {
 
     activeSessions.set(sessionId, newSession);
 
-    console.log(
-      `Timer started successfully for user ${userId}, session ${sessionId}`
-    );
-    // webHook send msg on discord
+    // console.log(
+    //   `Timer started successfully for user ${userId}, session ${sessionId}`
+    // );
+    // webHook send msg on discord'
+    console.log({
+      name: name,
+      Title: taskName,
+      sessionId: sessionId,
+      startTime: startTime, // Can be Date or ISO string
+      status: "active",
+    });
 
     await sendDiscordMessage("Session started", {
+      name: name,
       Title: taskName,
       sessionId: sessionId,
       startTime: startTime, // Can be Date or ISO string

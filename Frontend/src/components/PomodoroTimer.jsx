@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { startTimer, pauseTimer, resumeTimer, completeTimer } from "../api/timer";
+import {
+  startTimer,
+  pauseTimer,
+  resumeTimer,
+  completeTimer,
+} from "../api/timer";
 
 export default function PomodoroTimer({
   taskId,
@@ -7,8 +12,9 @@ export default function PomodoroTimer({
   category,
   onSessionComplete,
   isDarkMode = true,
+  name,
 }) {
-  const task = { id: taskId, name: taskName };
+  const task = { id: taskId, name: taskName, username: name };
   const WORK_DEFAULT = 25 * 60;
   const [secondsLeft, setSecondsLeft] = useState(WORK_DEFAULT);
   const [running, setRunning] = useState(false);
@@ -16,7 +22,6 @@ export default function PomodoroTimer({
   const [isPaused, setIsPaused] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(false);
-
 
   useEffect(() => {
     let interval;
@@ -40,7 +45,19 @@ export default function PomodoroTimer({
 
     try {
       setLoading(true);
-      const res = await startTimer(task.id, task.name || task.subject, category);
+      const resOnj = {
+        id: task.id,
+        taskName: task.name || task.subject,
+        c: category,
+        username: task.username,
+      };
+      console.log(resOnj);
+      const res = await startTimer(
+        task.id,
+        task.name || task.subject,
+        category,
+        task.username
+      );
       console.log("Start API response:", res);
       const sid =
         res?.sessionId ||
@@ -76,8 +93,6 @@ export default function PomodoroTimer({
     }
   };
 
-
-
   const resume = async () => {
     if (!sessionId) return;
     try {
@@ -92,7 +107,6 @@ export default function PomodoroTimer({
       console.error("Error resuming timer:", err);
     }
   };
-
 
   const reset = () => {
     setRunning(false);
@@ -117,7 +131,6 @@ export default function PomodoroTimer({
       if (onSessionComplete) onSessionComplete();
     }
   };
-
 
   const format = (sec) => {
     const m = Math.floor(sec / 60)
@@ -231,12 +244,10 @@ export default function PomodoroTimer({
       <button
         className={`w-full py-4 rounded-lg text-white font-semibold text-lg mb-4 transition-all duration-200 ${
           running
-          ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
-          : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
-          } focus:outline-none shadow-lg`}
-
+            ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
+            : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
+        } focus:outline-none shadow-lg`}
         onClick={() => {
-
           if (!taskId || !taskName || !category) {
             setShowPopup(true);
             return;
@@ -282,7 +293,8 @@ export default function PomodoroTimer({
 
             {/* Message */}
             <p className="text-gray-700 text-sm mb-6">
-              You need to pick a task and category before starting your session...
+              You need to pick a task and category before starting your
+              session...
             </p>
 
             {/* Buttons */}
@@ -296,7 +308,6 @@ export default function PomodoroTimer({
           </div>
         </div>
       )}
-
 
       {/* Secondary Action Buttons */}
       <div className="flex gap-3 w-full">

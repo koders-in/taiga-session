@@ -12,15 +12,20 @@ export default function PomodoroTimerPage({}) {
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [name, setName] = useState("");
 
   useEffect(() => {
     const email = localStorage.getItem("email");
     const photo = localStorage.getItem("photo");
+    const name = localStorage.getItem("name");
     if (email) {
       setUserEmail(email);
     }
     if (photo) {
       setUserPhoto(photo);
+    }
+    if (name) {
+      setName(name);
     }
   }, []);
 
@@ -116,10 +121,11 @@ export default function PomodoroTimerPage({}) {
         {/* Left: Pomodoro Timer card */}
         <div className="xl:col-span-1">
           <PomodoroTimer
-            taskId={selectedTask?.id} 
-            taskName={selectedTask?.subject} 
+            taskId={selectedTask?.id}
+            taskName={selectedTask?.subject}
             category={selectedCategory}
             isDarkMode={isDarkMode}
+            name={name}
             onSessionComplete={() => {
               // refresh data when session completes
             }}
