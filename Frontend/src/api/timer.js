@@ -4,7 +4,7 @@ const API_BASE = "http://localhost:4000/api/timer";
 
 export async function startTimer(taskId, taskName, category) {
   const token = getToken();
-  if (!token || !taskId || !taskName) {
+  if (!token || !taskId || !taskName || !category) {
     return { success: false, message: "Missing token, taskId, or taskName" };
   }
 
@@ -19,7 +19,7 @@ export async function startTimer(taskId, taskName, category) {
         task_Id: taskId,
         task_Name: taskName,
         category: category
-        
+
       }),
     });
     return await res.json();

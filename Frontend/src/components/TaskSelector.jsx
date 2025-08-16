@@ -17,27 +17,48 @@ export default function TaskSelector({
     { id: 3, name: "Frontend Development" },
     { id: 4, name: "Backend Development" },
     { id: 5, name: "DevOps & Deployment" },
-    { id: 5, name: "Testing & QA" },
-    { id: 5, name: "Documentation & Knowledge Baset" },
-    { id: 5, name: "Stakeholder/Client/Team Communicationt" },
-    { id: 5, name: "HR & Administration" },
-    { id: 5, name: "Support & Maintenance" }
+    { id: 6, name: "Testing & QA" },
+    { id: 7, name: "Documentation & Knowledge Baset" },
+    { id: 8, name: "Stakeholder/Client/Team Communicationt" },
+    { id: 9, name: "HR & Administration" },
+    { id: 10, name: "Support & Maintenance" }
   ];
 
   // Fetch projects
   useEffect(() => {
-    fetchProjects().then((data) => {
-      if (data.success) setProjects(data.data);
-    });
+    const cachedProjects = localStorage.getItem("projects");
+
+    if (cachedProjects) {
+      setProjects(JSON.parse(cachedProjects));
+    } else {
+      fetchProjects().then((data) => {
+        if (data.success) {
+          setProjects(data.data);
+          localStorage.setItem("projects", JSON.stringify(data.data));
+        }
+      });
+    }
   }, []);
 
-  // Fetch tasks for selected project
+  // Fetch task
   useEffect(() => {
     if (!selectedProject) return;
 
-    fetchTasksByProject(selectedProject).then((data) => {
-      if (data.success) setTasks(data.data);
-    });
+    const cachedTasks = localStorage.getItem(`tasks_${selectedProject}`);
+
+    if (cachedTasks) {
+      setTasks(JSON.parse(cachedTasks));
+    } else {
+      fetchTasksByProject(selectedProject).then((data) => {
+        if (data.success) {
+          setTasks(data.data);
+          localStorage.setItem(
+            `tasks_${selectedProject}`,
+            JSON.stringify(data.data)
+          );
+        }
+      });
+    }
   }, [selectedProject]);
 
   return (

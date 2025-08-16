@@ -36,15 +36,15 @@ export const Login = async (username, password) => {
       if (photo) {
         localStorage.setItem("photo", photo);
       } else {
-        localStorage.removeItem("photo"); 
-      } 
-    } 
+        localStorage.removeItem("photo");
+      }
+    }
     else {
       console.warn("No token received from the backend");
     }
-    
+
     console.log({ token });
-   return { message, refreshtoken, email, photo };
+    return { message, refreshtoken, email, photo };
   } catch (error) {
     console.error("API Error:", error.response?.data || error.message);
     throw error;
