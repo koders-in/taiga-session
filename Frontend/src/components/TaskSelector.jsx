@@ -6,11 +6,11 @@ export default function TaskSelector({
   onTaskChange,
   selectedCategory,
   onCategoryChange,
+  isDarkMode = true
 }) {
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState("");
   const [tasks, setTasks] = useState([]);
-
   const categories = [
     { id: 1, name: "Planning & Requirements" },
     { id: 2, name: "Design & Prototyping" },
@@ -61,6 +61,15 @@ export default function TaskSelector({
     }
   }, [selectedProject]);
 
+  const themeStyles = {
+    dropdown: isDarkMode
+      ? "bg-gray-800/90 text-white border border-white/10"
+      : "bg-white text-gray-900 border border-gray-300 shadow-sm",
+    dropdownOption: isDarkMode
+      ? "bg-gray-800 text-white"
+      : "bg-white text-gray-900",
+  };
+
   return (
     <div className="flex gap-3 items-center">
       {/* Project Dropdown */}
@@ -71,11 +80,11 @@ export default function TaskSelector({
           setTasks([]);
           onTaskChange && onTaskChange(null);
         }}
-        className="bg-gray-800/90 text-white p-2 rounded border border-white/10 w-[180px]"
+        className={`p-2 rounded w-[180px] ${themeStyles.dropdown}`}
       >
         <option value="">Select a project</option>
         {projects.map((p) => (
-          <option key={p.id} value={p.id}>
+          <option key={p.id} value={p.id} className={themeStyles.dropdownOption}>
             {p.name}
           </option>
         ))}
@@ -88,12 +97,12 @@ export default function TaskSelector({
           const t = tasks.find((x) => String(x.id) === e.target.value) || null;
           onTaskChange && onTaskChange(t);
         }}
-        className="bg-gray-800/90 text-white p-2 rounded border border-white/10 w-[180px]"
+        className={`p-2 rounded w-[180px] ${themeStyles.dropdown}`}
         disabled={!selectedProject}
       >
         <option value="">Select a task</option>
         {tasks.map((t) => (
-          <option key={t.id} value={t.id} className="truncate">
+          <option key={t.id} value={t.id} className={themeStyles.dropdownOption}>
             {t.subject}
           </option>
         ))}
@@ -103,11 +112,11 @@ export default function TaskSelector({
       <select
         value={selectedCategory || ""}
         onChange={(e) => onCategoryChange && onCategoryChange(e.target.value)}
-        className="bg-gray-800/90 text-white p-2 rounded border  border-white/10 w-[180px]"
+        className={`p-2 rounded w-[180px] ${themeStyles.dropdown}`}
       >
         <option value="">Select a category</option>
         {categories.map((c) => (
-          <option key={c.id} value={c.name}>
+          <option key={c.id} value={c.name} className={themeStyles.dropdownOption}>
             {c.name}
           </option>
         ))}

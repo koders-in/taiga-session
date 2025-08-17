@@ -146,6 +146,7 @@ export default function PomodoroTimerPage({}) {
                   onTaskChange={(t) => setSelectedTask(t)}
                   selectedCategory={selectedCategory}
                   onCategoryChange={(c) => setSelectedCategory(c)}
+                  isDarkMode={isDarkMode}
                 />
               </div>
             </div>

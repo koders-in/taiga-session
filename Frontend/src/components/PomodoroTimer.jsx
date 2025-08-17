@@ -166,6 +166,15 @@ export default function PomodoroTimer({
     statsLabel: isDarkMode ? "text-slate-400" : "text-gray-600",
     statsValue: isDarkMode ? "text-white" : "text-gray-900",
     progressBarBg: isDarkMode ? "bg-slate-600" : "bg-gray-200",
+    popupContainer: isDarkMode
+      ? "bg-slate-800 border border-slate-700 text-gray-200"
+      : "bg-white border border-gray-200 text-gray-900 shadow-xl",
+    popupTitle: isDarkMode ? "text-gray-100" : "text-gray-900",
+    popupMessage: isDarkMode ? "text-gray-400" : "text-gray-600",
+    popupDivider: isDarkMode ? "border-gray-700" : "border-gray-300",
+    popupButton: isDarkMode
+      ? "text-blue-400 py-3 text-base font-medium hover:bg-gray-700 transition w-full"
+      : "text-blue-600 py-3 text-base font-medium hover:bg-gray-100 transition w-full",
   };
 
   return (
@@ -242,11 +251,10 @@ export default function PomodoroTimer({
 
       {/* Main Action Button */}
       <button
-        className={`w-full py-4 rounded-lg text-white font-semibold text-lg mb-4 transition-all duration-200 ${
-          running
-            ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
-            : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
-        } focus:outline-none shadow-lg`}
+        className={`w-full py-4 rounded-lg text-white font-semibold text-lg mb-4 transition-all duration-200 ${running
+          ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
+          : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
+          } focus:outline-none shadow-lg`}
         onClick={() => {
           if (!taskId || !taskName || !category) {
             setShowPopup(true);
@@ -285,23 +293,24 @@ export default function PomodoroTimer({
 
       {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
-          <div className="bg-white rounded-2xl w-80 shadow-xl text-center p-6">
+          <div className={`rounded-2xl w-80 text-center p-6 ${themeStyles.popupContainer}`}>
             {/* Title */}
-            <h2 className="text-black text-lg font-semibold mb-2">
+            <h2 className={`text-lg font-semibold mb-2 ${themeStyles.popupTitle}`}>
               Selection Needed
             </h2>
 
             {/* Message */}
-            <p className="text-gray-700 text-sm mb-6">
-              You need to pick a task and category before starting your
-              session...
+            <p className={`text-sm mb-6 ${themeStyles.popupMessage}`}>
+              You need to pick a task and category before starting your session...
             </p>
 
-            {/* Buttons */}
-            <div className="border-t border-gray-300"></div>
+            {/* Divider */}
+            <div className={`border-t ${themeStyles.popupDivider}`}></div>
+
+            {/* Button */}
             <button
               onClick={() => setShowPopup(false)}
-              className="text-blue-600 py-3 text-base font-medium hover:bg-gray-100 transition w-full"
+              className={themeStyles.popupButton}
             >
               OK
             </button>
