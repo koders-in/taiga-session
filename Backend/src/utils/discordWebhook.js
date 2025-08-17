@@ -44,6 +44,8 @@ export async function sendDiscordMessage(content, embedData = null) {
           color = 16776960; // yellow
         } else if (statusLower === "end") {
           color = 15158332; // red
+        } else if ((statusLower = "completed")) {
+          color = 3447003; // blue
         }
       }
 

@@ -287,16 +287,17 @@ export const resumeTimer = async (req, res) => {
 // Complete timer
 export const completeTimer = async (req, res) => {
   try {
-    const { sessionId } = req.params;
     const { auto } = req.body;
 
-    const userId = req.user.id;
+    const { sessionId } = req.params;
+    const { full_name, id } = req.user;
+
     const session = activeSessions.get(sessionId);
 
-    if (!session || session.userId !== userId) {
+    if (!session || session.userId !== id || session.status !== "active") {
       return res
         .status(404)
-        .json({ success: false, message: "Session not found" });
+        .json({ success: false, message: "Session not found or not active" });
     }
 
     const now = new Date();
@@ -320,7 +321,13 @@ export const completeTimer = async (req, res) => {
     if (!auto) {
       await updateTaskStatus(session.taskId, "Completed");
     }
-
+    await sendDiscordMessage("Complete Session", {
+      name: full_name,
+      Title: session.taskName,
+      sessionId: sessionId,
+      startTime: Date.now(), // Can be Date or ISO string
+      status: "completed",
+    });
     return res.json({
       success: true,
       endTime: now,
