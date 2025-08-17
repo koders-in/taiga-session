@@ -2,7 +2,26 @@ import axios from "axios";
 
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
+// desc: Helper Function formats name, TODO: Save this Function in a different folder
+
+function formatName(rawName) {
+  if (!rawName) return "";
+
+  // Replace underscores/dots with spaces
+  let name = rawName.replace(/[_\.]/g, " ");
+
+  // Insert space before capital letters (camelCase → camel Case)
+  name = name.replace(/([a-z])([A-Z])/g, "$1 $2");
+
+  // Capitalize each word
+  return name
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
 export async function sendDiscordMessage(content, embedData = null) {
+  console.log({ embedData });
   try {
     const payload = {
       content: content,
@@ -28,26 +47,45 @@ export async function sendDiscordMessage(content, embedData = null) {
         }
       }
 
-      // Auto-build embed
       payload.embeds = [
         {
+          author: {
+            name: `🔴 ${formatName(embedData.name)}` || "Pomodoro Timer",
+          },
           color: color,
-          title: embedData.title || embedData.Title || "Details",
-          description: embedData.description || "",
+
           fields: [
+            embedData.project && {
+              name: "📂 Project",
+              value: embedData.project,
+              inline: false,
+            },
+            {
+              name: "📝 Task",
+              value: embedData.title || embedData.Title || "No Task",
+              inline: false,
+            },
             embedData.sessionId && {
-              name: "Session ID",
-              value: embedData.sessionId.toString(),
+              name: "🆔 Session",
+              value: `\`${embedData.sessionId}\``,
+              inline: false,
             },
             embedData.startTime && {
-              name: "Start Time",
+              name: "🕒 Started",
               value: embedData.startTime,
+              inline: true,
             },
             embedData.status && {
-              name: "Status",
+              name: "📌 Status",
               value: embedData.status,
+              inline: true,
             },
           ].filter(Boolean),
+
+          timestamp: new Date(),
+          footer: {
+            text: "⏱ Stay focused!",
+          },
         },
       ];
     }

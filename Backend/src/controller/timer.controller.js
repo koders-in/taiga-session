@@ -66,7 +66,15 @@ const updateSessionRecord = async (Id, updateData) => {
 // Start timer
 export const startTimer = async (req, res) => {
   try {
+<<<<<<< HEAD
     const { task_Id, task_Name, category } = req.body;
+=======
+    // Get task details from frontend
+    const { task_Id, task_Name, category, duration_minutes, name, project } =
+      req.body;
+
+    // Get user ID from the authenticated user
+>>>>>>> ba1f753d1b48c3a8df85cdd53dc9bb2a55a277c7
     const userId = req.user.id;
 
     if (!task_Id || !task_Name || !category) {
@@ -87,10 +95,18 @@ export const startTimer = async (req, res) => {
     const sessionId = uuidv4();
     const startTime = new Date().toISOString();
 
+<<<<<<< HEAD
     // --- Check if task already exists ---
     let taskRecordId;
     const filterUrl = `${NOCODB_BASE_URL}/api/v2/tables/${TASKS_TABLE_ID}/records?where=(task_id,eq,${task_Id})~and(user_id,eq,${userId})`;
     const existingTaskRes = await axios.get(filterUrl, { headers: nocoHeaders });
+=======
+    // console.log(`Creating new task for user ${userId}:`, {
+    //   task_Id,
+    //   task_Name,
+    //   startTime,
+    // });
+>>>>>>> ba1f753d1b48c3a8df85cdd53dc9bb2a55a277c7
 
     if (existingTaskRes.data.list && existingTaskRes.data.list.length > 0) {
       taskRecordId = existingTaskRes.data.list[0].Id;
@@ -137,6 +153,7 @@ export const startTimer = async (req, res) => {
       status: "active",
       pauseStart: null,
       pauseDuration: 0,
+<<<<<<< HEAD
       lastResumeTime: new Date(),
       duration_minutes: 0,
       recordId: sessionRecordId, // 🔑 store DB record id
@@ -146,7 +163,32 @@ export const startTimer = async (req, res) => {
       Title: task_Name,
       sessionId,
       startTime,
+=======
+      pauses: [],
+    };
+
+    activeSessions.set(sessionId, newSession);
+
+    // console.log(
+    //   `Timer started successfully for user ${userId}, session ${sessionId}`
+    // );
+    // webHook send msg on discord'
+    console.log({
+      name: name,
+      Title: taskName,
+      sessionId: sessionId,
+      startTime: startTime, // Can be Date or ISO string
+>>>>>>> ba1f753d1b48c3a8df85cdd53dc9bb2a55a277c7
       status: "active",
+    });
+
+    await sendDiscordMessage("Session started", {
+      name: name,
+      Title: taskName,
+      sessionId: sessionId,
+      startTime: startTime, // Can be Date or ISO string
+      status: "active",
+      project: project,
     });
 
     return res.status(201).json({

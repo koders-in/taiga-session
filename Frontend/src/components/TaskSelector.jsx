@@ -2,43 +2,75 @@ import React, { useEffect, useState } from "react";
 import { fetchProjects, fetchTasksByProject } from "../api/task";
 
 export default function TaskSelector({
+  selectedProject,
+  setSelectedProject,
   selectedTask,
   onTaskChange,
   selectedCategory,
   onCategoryChange,
+  isDarkMode = true,
 }) {
   const [projects, setProjects] = useState([]);
-  const [selectedProject, setSelectedProject] = useState("");
   const [tasks, setTasks] = useState([]);
-
   const categories = [
     { id: 1, name: "Planning & Requirements" },
     { id: 2, name: "Design & Prototyping" },
     { id: 3, name: "Frontend Development" },
     { id: 4, name: "Backend Development" },
     { id: 5, name: "DevOps & Deployment" },
-    { id: 5, name: "Testing & QA" },
-    { id: 5, name: "Documentation & Knowledge Baset" },
-    { id: 5, name: "Stakeholder/Client/Team Communicationt" },
-    { id: 5, name: "HR & Administration" },
-    { id: 5, name: "Support & Maintenance" }
+    { id: 6, name: "Testing & QA" },
+    { id: 7, name: "Documentation & Knowledge Baset" },
+    { id: 8, name: "Stakeholder/Client/Team Communicationt" },
+    { id: 9, name: "HR & Administration" },
+    { id: 10, name: "Support & Maintenance" },
   ];
 
   // Fetch projects
   useEffect(() => {
-    fetchProjects().then((data) => {
-      if (data.success) setProjects(data.data);
-    });
+    const cachedProjects = localStorage.getItem("projects");
+    console.log(cachedProjects);
+
+    if (cachedProjects) {
+      setProjects(JSON.parse(cachedProjects));
+    } else {
+      fetchProjects().then((data) => {
+        if (data.success) {
+          setProjects(data.data);
+          localStorage.setItem("projects", JSON.stringify(data.data));
+        }
+      });
+    }
   }, []);
 
-  // Fetch tasks for selected project
+  // Fetch task
   useEffect(() => {
     if (!selectedProject) return;
 
-    fetchTasksByProject(selectedProject).then((data) => {
-      if (data.success) setTasks(data.data);
-    });
+    const cachedTasks = localStorage.getItem(`tasks_${selectedProject}`);
+
+    if (cachedTasks) {
+      setTasks(JSON.parse(cachedTasks));
+    } else {
+      fetchTasksByProject(selectedProject).then((data) => {
+        if (data.success) {
+          setTasks(data.data);
+          localStorage.setItem(
+            `tasks_${selectedProject}`,
+            JSON.stringify(data.data)
+          );
+        }
+      });
+    }
   }, [selectedProject]);
+
+  const themeStyles = {
+    dropdown: isDarkMode
+      ? "bg-gray-800/90 text-white border border-white/10"
+      : "bg-white text-gray-900 border border-gray-300 shadow-sm",
+    dropdownOption: isDarkMode
+      ? "bg-gray-800 text-white"
+      : "bg-white text-gray-900",
+  };
 
   return (
     <div className="flex gap-3 items-center">
@@ -50,11 +82,15 @@ export default function TaskSelector({
           setTasks([]);
           onTaskChange && onTaskChange(null);
         }}
-        className="bg-gray-800/90 text-white p-2 rounded border border-white/10 w-[180px]"
+        className={`p-2 rounded w-[180px] ${themeStyles.dropdown}`}
       >
         <option value="">Select a project</option>
         {projects.map((p) => (
-          <option key={p.id} value={p.id}>
+          <option
+            key={p.id}
+            value={p.id}
+            className={themeStyles.dropdownOption}
+          >
             {p.name}
           </option>
         ))}
@@ -67,12 +103,16 @@ export default function TaskSelector({
           const t = tasks.find((x) => String(x.id) === e.target.value) || null;
           onTaskChange && onTaskChange(t);
         }}
-        className="bg-gray-800/90 text-white p-2 rounded border border-white/10 w-[180px]"
+        className={`p-2 rounded w-[180px] ${themeStyles.dropdown}`}
         disabled={!selectedProject}
       >
         <option value="">Select a task</option>
         {tasks.map((t) => (
-          <option key={t.id} value={t.id} className="truncate">
+          <option
+            key={t.id}
+            value={t.id}
+            className={themeStyles.dropdownOption}
+          >
             {t.subject}
           </option>
         ))}
@@ -82,11 +122,15 @@ export default function TaskSelector({
       <select
         value={selectedCategory || ""}
         onChange={(e) => onCategoryChange && onCategoryChange(e.target.value)}
-        className="bg-gray-800/90 text-white p-2 rounded border  border-white/10 w-[180px]"
+        className={`p-2 rounded w-[180px] ${themeStyles.dropdown}`}
       >
         <option value="">Select a category</option>
         {categories.map((c) => (
-          <option key={c.id} value={c.name}>
+          <option
+            key={c.id}
+            value={c.name}
+            className={themeStyles.dropdownOption}
+          >
             {c.name}
           </option>
         ))}
@@ -94,4 +138,3 @@ export default function TaskSelector({
     </div>
   );
 }
-

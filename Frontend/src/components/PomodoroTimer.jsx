@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { startTimer, pauseTimer, resumeTimer, completeTimer } from "../api/timer";
+import {
+  startTimer,
+  pauseTimer,
+  resumeTimer,
+  completeTimer,
+} from "../api/timer";
 
 export default function PomodoroTimer({
   taskId,
@@ -7,13 +12,17 @@ export default function PomodoroTimer({
   category,
   onSessionComplete,
   isDarkMode = true,
+  name,
+  project,
 }) {
-  const task = { id: taskId, name: taskName };
+  const task = { id: taskId, name: taskName, username: name, project };
   const WORK_DEFAULT = 25 * 60;
   const [secondsLeft, setSecondsLeft] = useState(WORK_DEFAULT);
   const [running, setRunning] = useState(false);
   const [sessionId, setSessionId] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let interval;
@@ -28,67 +37,82 @@ export default function PomodoroTimer({
     return () => clearInterval(interval);
   }, [running, secondsLeft, onSessionComplete]);
 
-const start = async () => {
-  if (!task?.id || !(task.name || task.subject) || !category) {
-    console.warn("Please select both task and category before starting.");
-    return;
-  }
-
-  try {
-    const res = await startTimer(task.id, task.name || task.subject);
-    const sid =
-      res?.sessionId ||
-      res?.session_id ||
-      res?.data?.sessionId ||
-      res?.data?.session_id;
-
-    if (res?.success && sid) {
-      setSessionId(sid);
-      setRunning(true);
-      setIsPaused(false);
-      setSecondsLeft(WORK_DEFAULT);
-    } else {
-      console.error("Start timer failed:", res);
+  const start = async () => {
+    if (loading) return;
+    if (!task?.id || !(task.name || task.subject) || !category|| !project) {
+      console.warn("Please select both task and category before starting.");
+      return;
     }
-  } catch (err) {
-    console.error("Error starting timer:", err);
-  }
-};
 
+    try {
+      setLoading(true);
+      const resOnj = {
+        id: task.id,
+        taskName: task.name || task.subject,
+        c: category,
+        username: task.username,
+        project: project,
+      };
+      console.log(resOnj);
+      const res = await startTimer(
+        task.id,
+        task.name || task.subject,
+        category,
+        task.username,
+        project
+      );
+      console.log("Start API response:", res);
+      const sid =
+        res?.sessionId ||
+        res?.session_id ||
+        res?.data?.sessionId ||
+        res?.data?.session_id;
 
+      if (res?.success && sid) {
+        setSessionId(sid);
+        setRunning(true);
+        setIsPaused(false);
+        setSecondsLeft(WORK_DEFAULT);
+      } else {
+        console.error("Start timer failed:", res);
+      }
+    } catch (err) {
+      console.error("Error starting timer:", err);
+    }
+    finally {
+      setLoading(false);
+    }
+  };
 
   const pause = async () => {
-  if (!sessionId) return;
-  try {
-    const res = await pauseTimer(sessionId);
-    if (res?.success) {
-      setRunning(false);
-      setIsPaused(true);
-    } else {
-      console.error("Pause timer failed:", res);
+    if (!sessionId) return;
+    try {
+      const res = await pauseTimer(sessionId);
+      if (res?.success) {
+        setRunning(false);
+        setIsPaused(true);
+      } else {
+        console.error("Pause timer failed:", res);
+      }
+    } catch (err) {
+      console.error("Error pausing timer:", err);
     }
-  } catch (err) {
-    console.error("Error pausing timer:", err);
-  }
-};
-
-
+  };
 
   const resume = async () => {
-  if (!sessionId) return;
-  try {
-    const res = await resumeTimer(sessionId);
-    if (res?.success) {
-      setRunning(true);
-      setIsPaused(false);
-    } else {
-      console.error("Resume timer failed:", res);
+    if (!sessionId) return;
+    try {
+      const res = await resumeTimer(sessionId);
+      if (res?.success) {
+        setRunning(true);
+        setIsPaused(false);
+      } else {
+        console.error("Resume timer failed:", res);
+      }
+    } catch (err) {
+      console.error("Error resuming timer:", err);
     }
-  } catch (err) {
-    console.error("Error resuming timer:", err);
-  }
-};
-
+  };
 
   const reset = () => {
     setRunning(false);
@@ -96,24 +120,23 @@ const start = async () => {
   };
 
   const handleComplete = async () => {
-  try {
-    if (sessionId) {
-      const res = await completeTimer(sessionId);
-      if (!res?.success) {
-        console.error("Complete timer failed:", res);
+    try {
+      if (sessionId) {
+        const res = await completeTimer(sessionId);
+        if (!res?.success) {
+          console.error("Complete timer failed:", res);
+        }
       }
+    } catch (err) {
+      console.error("Error completing timer:", err);
+    } finally {
+      setRunning(false);
+      setIsPaused(false);
+      setSecondsLeft(WORK_DEFAULT);
+      setSessionId(null);
+      if (onSessionComplete) onSessionComplete();
     }
-  } catch (err) {
-    console.error("Error completing timer:", err);
-  } finally {
-    setRunning(false);
-    setIsPaused(false);
-    setSecondsLeft(WORK_DEFAULT);
-    setSessionId(null);
-    if (onSessionComplete) onSessionComplete();
-  }
-};
-
+  };
 
   const format = (sec) => {
     const m = Math.floor(sec / 60)
@@ -149,6 +172,15 @@ const start = async () => {
     statsLabel: isDarkMode ? "text-slate-400" : "text-gray-600",
     statsValue: isDarkMode ? "text-white" : "text-gray-900",
     progressBarBg: isDarkMode ? "bg-slate-600" : "bg-gray-200",
+    popupContainer: isDarkMode
+      ? "bg-slate-800 border border-slate-700 text-gray-200"
+      : "bg-white border border-gray-200 text-gray-900 shadow-xl",
+    popupTitle: isDarkMode ? "text-gray-100" : "text-gray-900",
+    popupMessage: isDarkMode ? "text-gray-400" : "text-gray-600",
+    popupDivider: isDarkMode ? "border-gray-700" : "border-gray-300",
+    popupButton: isDarkMode
+      ? "text-blue-400 py-3 text-base font-medium hover:bg-gray-700 transition w-full"
+      : "text-blue-600 py-3 text-base font-medium hover:bg-gray-100 transition w-full",
   };
 
   return (
@@ -225,33 +257,21 @@ const start = async () => {
 
       {/* Main Action Button */}
       <button
-        className={`w-full py-4 rounded-lg text-white font-semibold text-lg mb-4 transition-all duration-200 ${
-          running
+        className={`w-full py-4 rounded-lg text-white font-semibold text-lg mb-4 transition-all duration-200 ${running
             ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
             : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
-        } focus:outline-none shadow-lg`}
-        
-       onClick={() => {
-      // Debug logs
-      console.log("taskId prop:", taskId);
-      console.log("taskName prop:", taskName);
-      console.log("category prop:", category);
-      console.log("running:", running);
-      console.log("isPaused:", isPaused);
+          } focus:outline-none shadow-lg`}
+        onClick={() => {
+          if (!taskId || !taskName || !category) {
+            setShowPopup(true);
+            return;
+          }
 
-      console.log("Task:", task);
-      console.log("Category:", category);
-
-     if (!taskId || !taskName || !category)  {
-        console.warn("Task or category missing!");
-        return;
-      }
-
-      if (running) pause();
-      else if (isPaused) resume();
-      else start();
-    }}
-        disabled={(!taskId || !category) && !running}
+          if (running) pause();
+          else if (isPaused) resume();
+          else start();
+        }}
+        disabled={running || loading}
       >
         {running ? (
           <span className="flex items-center justify-center gap-2">
@@ -259,13 +279,13 @@ const start = async () => {
               <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
             </svg>
             Pause
-             </span>
-      ) : isPaused ? (
-        <span className="flex items-center justify-center gap-2">
-        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-        <path d="m7 4 10 6L7 16V4z" />
-    </svg>
-    Resume
+          </span>
+        ) : isPaused ? (
+          <span className="flex items-center justify-center gap-2">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="m7 4 10 6L7 16V4z" />
+            </svg>
+            Resume
           </span>
         ) : (
           <span className="flex items-center justify-center gap-2">
@@ -276,6 +296,38 @@ const start = async () => {
           </span>
         )}
       </button>
+
+      {showPopup && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+          <div
+            className={`rounded-2xl w-80 text-center p-6 ${themeStyles.popupContainer}`}
+          >
+            {/* Title */}
+            <h2
+              className={`text-lg font-semibold mb-2 ${themeStyles.popupTitle}`}
+            >
+              Selection Needed
+            </h2>
+
+            {/* Message */}
+            <p className={`text-sm mb-6 ${themeStyles.popupMessage}`}>
+              You need to pick a task and category before starting your
+              session...
+            </p>
+
+            {/* Divider */}
+            <div className={`border-t ${themeStyles.popupDivider}`}></div>
+
+            {/* Button */}
+            <button
+              onClick={() => setShowPopup(false)}
+              className={themeStyles.popupButton}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Secondary Action Buttons */}
       <div className="flex gap-3 w-full">

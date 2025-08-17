@@ -2,9 +2,10 @@ import { getToken } from "./login";
 
 const API_BASE = "http://localhost:4000/api/timer";
 
-export async function startTimer(taskId, taskName, category) {
+export async function startTimer(taskId, taskName, category, name, project) {
   const token = getToken();
-  if (!token || !taskId || !taskName) {
+
+  if (!token || !taskId || !taskName || !category) {
     return { success: false, message: "Missing token, taskId, or taskName" };
   }
 
@@ -16,10 +17,11 @@ export async function startTimer(taskId, taskName, category) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        name: name,
         task_Id: taskId,
         task_Name: taskName,
-        category: category
-        
+        category: category,
+        project: project,
       }),
     });
     return await res.json();
@@ -28,7 +30,6 @@ export async function startTimer(taskId, taskName, category) {
     return { success: false, message: "Request failed" };
   }
 }
-
 
 export async function pauseTimer(sessionId) {
   const token = getToken();
@@ -50,7 +51,6 @@ export async function pauseTimer(sessionId) {
   }
 }
 
-
 export async function resumeTimer(sessionId) {
   const token = getToken();
   if (!token || !sessionId) {
@@ -70,7 +70,6 @@ export async function resumeTimer(sessionId) {
     return { success: false, message: "Request failed" };
   }
 }
-
 
 export async function completeTimer(sessionId) {
   const token = getToken();

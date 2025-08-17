@@ -9,18 +9,24 @@ import { logout } from "../api/login";
 export default function PomodoroTimerPage({}) {
   const [userEmail, setUserEmail] = useState("");
   const [userPhoto, setUserPhoto] = useState("");
+  const [selectedProject, setSelectedProject] = useState("");
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [name, setName] = useState("");
 
   useEffect(() => {
     const email = localStorage.getItem("email");
     const photo = localStorage.getItem("photo");
+    const name = localStorage.getItem("name");
     if (email) {
       setUserEmail(email);
     }
     if (photo) {
       setUserPhoto(photo);
+    }
+    if (name) {
+      setName(name);
     }
   }, []);
 
@@ -116,10 +122,14 @@ export default function PomodoroTimerPage({}) {
         {/* Left: Pomodoro Timer card */}
         <div className="xl:col-span-1">
           <PomodoroTimer
-            taskId={selectedTask?.id} 
-            taskName={selectedTask?.subject} 
+            project={selectedProject}
+            taskId={selectedTask?.id}
+            taskName={selectedTask?.subject}
             category={selectedCategory}
             isDarkMode={isDarkMode}
+            name={name}
+
+            // project={project}
             onSessionComplete={() => {
               // refresh data when session completes
             }}
@@ -136,10 +146,13 @@ export default function PomodoroTimerPage({}) {
               ></div>
               <div className="flex flex-col sm:flex-row gap-3">
                 <TaskSelector
+                  selectedProject={selectedProject}
+                  setSelectedProject={setSelectedProject}
                   selectedTask={selectedTask}
                   onTaskChange={(t) => setSelectedTask(t)}
                   selectedCategory={selectedCategory}
                   onCategoryChange={(c) => setSelectedCategory(c)}
+                  isDarkMode={isDarkMode}
                 />
               </div>
             </div>
@@ -241,11 +254,10 @@ export default function PomodoroTimerPage({}) {
                         </td>
                         <td className="py-3">
                           <span
-                            className={`px-2 sm:px-3 py-1 text-xs rounded-full whitespace-nowrap ${
-                              r.status === "Completed"
+                            className={`px-2 sm:px-3 py-1 text-xs rounded-full whitespace-nowrap ${r.status === "Completed"
                                 ? "bg-green-700 text-white"
                                 : "bg-yellow-600 text-white"
-                            }`}
+                              }`}
                           >
                             {r.status}
                           </span>
@@ -278,22 +290,20 @@ export default function PomodoroTimerPage({}) {
 
       {/* Bottom Navigation */}
       <div
-        className={`fixed bottom-0 left-0 right-0 ${
-          isDarkMode
+        className={`fixed bottom-0 left-0 right-0 ${isDarkMode
             ? "bg-slate-800 border-slate-700"
             : "bg-white border-gray-200"
-        } border-t`}
+          } border-t`}
       >
         <div className="flex justify-center items-center py-4 px-6">
           <div className="flex space-x-8">
             {/* Focus Sessions */}
             <button className="flex flex-col items-center space-y-1 group">
               <div
-                className={`p-2 rounded-full ${
-                  isDarkMode
+                className={`p-2 rounded-full ${isDarkMode
                     ? "text-red-400 bg-red-900/20"
                     : "text-red-500 bg-red-50"
-                }`}
+                  }`}
               >
                 <svg
                   className="w-6 h-6"
@@ -304,9 +314,8 @@ export default function PomodoroTimerPage({}) {
                 </svg>
               </div>
               <span
-                className={`text-xs font-medium ${
-                  isDarkMode ? "text-red-400" : "text-red-500"
-                }`}
+                className={`text-xs font-medium ${isDarkMode ? "text-red-400" : "text-red-500"
+                  }`}
               >
                 Focus Sessions
               </span>

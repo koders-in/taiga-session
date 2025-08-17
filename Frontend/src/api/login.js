@@ -25,6 +25,7 @@ export const Login = async (username, password) => {
     const { token, message, refreshtoken, user } = res.data;
     const email = user?.email || null; // return backend response
     const photo = user?.photo || null;
+    const name = user?.full_name;
     if (token) {
       setAuthToken(token);
       if (email) {
@@ -36,15 +37,19 @@ export const Login = async (username, password) => {
       if (photo) {
         localStorage.setItem("photo", photo);
       } else {
-        localStorage.removeItem("photo"); 
-      } 
-    } 
-    else {
+        localStorage.removeItem("photo");
+      }
+      if (name) {
+        localStorage.setItem("name", name);
+      } else {
+        localStorage.removeItem("name");
+      }
+    } else {
       console.warn("No token received from the backend");
     }
-    
+
     console.log({ token });
-   return { message, refreshtoken, email, photo };
+    return { message, refreshtoken, email, photo };
   } catch (error) {
     console.error("API Error:", error.response?.data || error.message);
     throw error;
