@@ -40,11 +40,11 @@ export async function sendDiscordMessage(content, embedData = null) {
       let color = 3066993; // default green
       if (embedData.status) {
         const statusLower = embedData.status.toLowerCase();
-        if (statusLower === "pause" || statusLower === "resume") {
+        if (statusLower === "pause" || statusLower === "resumed") {
           color = 16776960; // yellow
-        } else if (statusLower === "end") {
+        } else if (statusLower === "reset") {
           color = 15158332; // red
-        } else if ((statusLower = "completed")) {
+        } else if (statusLower === "completed") {
           color = 3447003; // blue
         }
       }
