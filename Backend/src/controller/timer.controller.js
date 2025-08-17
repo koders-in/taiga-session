@@ -115,11 +115,11 @@ export const startTimer = async (req, res) => {
       headers: nocoHeaders,
     });
 
-    // console.log(`Creating new task for user ${userId}:`, {
-    //   task_Id,
-    //   task_Name,
-    //   startTime,
-    // });
+    console.log(`Creating new task for user ${userId}:`, {
+      task_Id,
+      task_Name,
+      startTime,
+    });
 
     if (existingTaskRes.data.list && existingTaskRes.data.list.length > 0) {
       taskRecordId = existingTaskRes.data.list[0].Id;
@@ -172,32 +172,11 @@ export const startTimer = async (req, res) => {
       recordId: sessionRecordId, // 🔑 store DB record id
     });
 
-    await sendDiscordMessage("Session started", {
-      Title: task_Name,
-      sessionId,
-      startTime,
-
-      pauses: [],
-    });
-
-    activeSessions.set(sessionId, newSession);
-
-    // console.log(
-    //   `Timer started successfully for user ${userId}, session ${sessionId}`
-    // );
     // webHook send msg on discord'
-    console.log({
-      name: name,
-      Title: taskName,
-      sessionId: sessionId,
-      startTime: startTime, // Can be Date or ISO string
-
-      status: "active",
-    });
 
     await sendDiscordMessage("Session started", {
       name: name,
-      Title: taskName,
+      Title: task_Name,
       sessionId: sessionId,
       startTime: startTime, // Can be Date or ISO string
       status: "active",
@@ -250,6 +229,7 @@ export const pauseTimer = async (req, res) => {
       duration_minutes: session.duration_minutes.toFixed(2),
     });
 
+    await sendDiscordMessage("Pause Session", {});
     res.json({
       success: true,
       pausedAt: now,
