@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import api from "../api/api";
 import PomodoroTimer from "../components/PomodoroTimer";
 import TaskSelector from "../components/TaskSelector";
@@ -14,6 +14,10 @@ export default function PomodoroTimerPage({}) {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [name, setName] = useState("");
+  const [activeTab, setActiveTab] = useState("focus"); // Track active tab
+
+  // Create ref for session log section
+  const sessionLogRef = useRef(null);
 
   useEffect(() => {
     const email = localStorage.getItem("email");
@@ -37,6 +41,28 @@ export default function PomodoroTimerPage({}) {
   const onLogout = () => {
     logout();
   };
+
+  // Function to scroll to session log
+  const scrollToSessionLog = () => {
+    setActiveTab("analytics"); // Set analytics as active
+    if (sessionLogRef.current) {
+      sessionLogRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
+
+  // Function to handle focus sessions click
+  const handleFocusSessionsClick = () => {
+    setActiveTab("focus"); // Set focus as active
+    // Scroll to top of page (where the timer is)
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   const themeClasses = {
     background: isDarkMode
       ? "bg-slate-800 text-white"
@@ -128,7 +154,6 @@ export default function PomodoroTimerPage({}) {
             category={selectedCategory}
             isDarkMode={isDarkMode}
             name={name}
-
             // project={project}
             onSessionComplete={() => {
               // refresh data when session completes
@@ -254,10 +279,11 @@ export default function PomodoroTimerPage({}) {
                         </td>
                         <td className="py-3">
                           <span
-                            className={`px-2 sm:px-3 py-1 text-xs rounded-full whitespace-nowrap ${r.status === "Completed"
+                            className={`px-2 sm:px-3 py-1 text-xs rounded-full whitespace-nowrap ${
+                              r.status === "Completed"
                                 ? "bg-green-700 text-white"
                                 : "bg-yellow-600 text-white"
-                              }`}
+                            }`}
                           >
                             {r.status}
                           </span>
@@ -271,7 +297,10 @@ export default function PomodoroTimerPage({}) {
           </div>
 
           {/* Bottom: Session Log */}
-          <div className={`${themeClasses.card} p-4 rounded-lg`}>
+          <div
+            ref={sessionLogRef}
+            className={`${themeClasses.card} p-4 rounded-lg`}
+          >
             <h4
               className={`text-md font-semibold mb-3 ${themeClasses.text.primary}`}
             >
@@ -288,25 +317,34 @@ export default function PomodoroTimerPage({}) {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
+      {/* Bottom Navigation - Compact design */}
       <div
-        className={`fixed bottom-0 left-0 right-0 ${isDarkMode
+        className={`fixed bottom-0 left-0 right-0 ${
+          isDarkMode
             ? "bg-slate-800 border-slate-700"
             : "bg-white border-gray-200"
-          } border-t`}
+        } border-t`}
       >
-        <div className="flex justify-center items-center py-4 px-6">
-          <div className="flex space-x-8">
+        <div className="flex justify-center items-center py-2 px-4">
+          <div className="flex space-x-12">
             {/* Focus Sessions */}
-            <button className="flex flex-col items-center space-y-1 group">
+            <button
+              onClick={handleFocusSessionsClick}
+              className="flex flex-col items-center space-y-1 group"
+            >
               <div
-                className={`p-2 rounded-full ${isDarkMode
-                    ? "text-red-400 bg-red-900/20"
-                    : "text-red-500 bg-red-50"
-                  }`}
+                className={`p-2 rounded-full transition-all duration-200 ${
+                  activeTab === "focus"
+                    ? isDarkMode
+                      ? "text-red-400 bg-red-900/20"
+                      : "text-red-500 bg-red-50"
+                    : isDarkMode
+                    ? "text-gray-400 hover:text-gray-300"
+                    : "text-gray-500 hover:text-gray-600"
+                }`}
               >
                 <svg
-                  className="w-6 h-6"
+                  className="w-5 h-5"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -314,18 +352,38 @@ export default function PomodoroTimerPage({}) {
                 </svg>
               </div>
               <span
-                className={`text-xs font-medium ${isDarkMode ? "text-red-400" : "text-red-500"
-                  }`}
+                className={`text-xs font-medium transition-all duration-200 ${
+                  activeTab === "focus"
+                    ? isDarkMode
+                      ? "text-red-400"
+                      : "text-red-500"
+                    : isDarkMode
+                    ? "text-gray-400"
+                    : "text-gray-500"
+                }`}
               >
                 Focus Sessions
               </span>
             </button>
 
-            {/* Analytics */}
-            <button className="flex flex-col items-center space-y-1 group">
-              <div className={`p-2 rounded-full ${themeClasses.text.muted}`}>
+            {/* Analytics - with scroll functionality */}
+            <button
+              onClick={scrollToSessionLog}
+              className="flex flex-col items-center space-y-1 group hover:opacity-80 transition-all duration-200"
+            >
+              <div
+                className={`p-2 rounded-full transition-all duration-200 ${
+                  activeTab === "analytics"
+                    ? isDarkMode
+                      ? "text-red-400 bg-red-900/20"
+                      : "text-red-500 bg-red-50"
+                    : isDarkMode
+                    ? "text-gray-400 hover:text-gray-300"
+                    : "text-gray-500 hover:text-gray-600"
+                }`}
+              >
                 <svg
-                  className="w-6 h-6"
+                  className="w-5 h-5"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -333,31 +391,17 @@ export default function PomodoroTimerPage({}) {
                 </svg>
               </div>
               <span
-                className={`text-xs ${themeClasses.text.muted} group-hover:${themeClasses.text.secondary}`}
+                className={`text-xs font-medium transition-all duration-200 ${
+                  activeTab === "analytics"
+                    ? isDarkMode
+                      ? "text-red-400"
+                      : "text-red-500"
+                    : isDarkMode
+                    ? "text-gray-400"
+                    : "text-gray-500"
+                }`}
               >
                 Analytics
-              </span>
-            </button>
-
-            {/* Task Tracking */}
-            <button className="flex flex-col items-center space-y-1 group">
-              <div className={`p-2 rounded-full ${themeClasses.text.muted}`}>
-                <svg
-                  className="w-6 h-6"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
-                  <polyline points="14,2 14,8 20,8" />
-                  <line x1="16" y1="13" x2="8" y2="13" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
-                  <polyline points="10,9 9,9 8,9" />
-                </svg>
-              </div>
-              <span
-                className={`text-xs ${themeClasses.text.muted} group-hover:${themeClasses.text.secondary}`}
-              >
-                Task Tracking
               </span>
             </button>
           </div>
