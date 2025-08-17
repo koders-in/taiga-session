@@ -252,13 +252,15 @@ export const pauseTimer = async (req, res) => {
 export const resumeTimer = async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const userId = req.user.id;
+    const { full_name, id } = req.user;
 
     const session = activeSessions.get(sessionId);
-    if (!session || session.userId !== userId || session.status !== "Paused") {
+    console.log(session);
+
+    if (!session || session.userId !== id || session.status !== "Paused") {
       return res
         .status(404)
-        .json({ success: false, message: "Session not found or not paused" });
+        .json({ success: false, message: "Session not found or not Paused" });
     }
 
     session.status = "active";
@@ -266,6 +268,15 @@ export const resumeTimer = async (req, res) => {
     session.pauseStart = null;
 
     await updateSessionRecord(session.recordId, { status: "Started" });
+
+    await sendDiscordMessage("Resume session", {
+      name: full_name,
+      Title: session.taskName,
+      sessionId: sessionId,
+      startTime: Date.now(), // Can be Date or ISO string
+      status: "resumed",
+    });
+
     res.json({ success: true, resumedAt: session.lastResumeTime });
   } catch (err) {
     console.error("Resume timer error:", err);
