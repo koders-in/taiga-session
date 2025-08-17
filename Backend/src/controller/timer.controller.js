@@ -206,10 +206,11 @@ export const startTimer = async (req, res) => {
 export const pauseTimer = async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const userId = req.user.id;
+    const { full_name, id } = req.user;
 
     const session = activeSessions.get(sessionId);
-    if (!session || session.userId !== userId || session.status !== "active") {
+
+    if (!session || session.userId !== id || session.status !== "active") {
       return res
         .status(404)
         .json({ success: false, message: "Session not found or not active" });
@@ -229,7 +230,13 @@ export const pauseTimer = async (req, res) => {
       duration_minutes: session.duration_minutes.toFixed(2),
     });
 
-    await sendDiscordMessage("Pause Session", {});
+    await sendDiscordMessage("Pause Session", {
+      name: full_name,
+      Title: session.taskName,
+      sessionId: sessionId,
+      startTime: session.pauseStart, // Can be Date or ISO string
+      status: "pause",
+    });
     res.json({
       success: true,
       pausedAt: now,
