@@ -71,6 +71,27 @@ export async function resumeTimer(sessionId) {
   }
 }
 
+export async function resetTimer(sessionId) {
+  const token = getToken();
+  if (!token || !sessionId) {
+    return { success: false, message: "Missing token or sessionId" };
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/reset/${sessionId}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return await res.json();
+  } catch (error) {
+    console.error("Error resetting timer:", error);
+    return { success: false, message: "Request failed" };
+  }
+}
+
+
 export async function completeTimer(sessionId) {
   const token = getToken();
   if (!token || !sessionId) {

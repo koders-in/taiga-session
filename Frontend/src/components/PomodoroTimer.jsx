@@ -4,6 +4,7 @@ import {
   pauseTimer,
   resumeTimer,
   completeTimer,
+  resetTimer,
 } from "../api/timer";
 
 export default function PomodoroTimer({
@@ -39,7 +40,7 @@ export default function PomodoroTimer({
 
   const start = async () => {
     if (loading) return;
-    if (!task?.id || !(task.name || task.subject) || !category|| !project) {
+    if (!task?.id || !(task.name || task.subject) || !category || !project) {
       console.warn("Please select both task and category before starting.");
       return;
     }
@@ -114,9 +115,21 @@ export default function PomodoroTimer({
     }
   };
 
-  const reset = () => {
-    setRunning(false);
-    setSecondsLeft(WORK_DEFAULT);
+  const reset = async () => {
+    if (!sessionId) return;
+    try {
+      const res = await resetTimer(sessionId);
+      if (res?.success) {
+        setRunning(false);
+        setIsPaused(false);
+        setSecondsLeft(WORK_DEFAULT);
+        setSessionId(null);
+      } else {
+        console.error("Reset timer failed:", res);
+      }
+    } catch (err) {
+      console.error("Error resetting timer:", err);
+    }
   };
 
   const handleComplete = async () => {
@@ -258,8 +271,8 @@ export default function PomodoroTimer({
       {/* Main Action Button */}
       <button
         className={`w-full py-4 rounded-lg text-white font-semibold text-lg mb-4 transition-all duration-200 ${running
-            ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
-            : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
+          ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
+          : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
           } focus:outline-none shadow-lg`}
         onClick={() => {
           if (!taskId || !taskName || !category) {
@@ -271,7 +284,7 @@ export default function PomodoroTimer({
           else if (isPaused) resume();
           else start();
         }}
-        disabled={running || loading}
+        disabled={loading}
       >
         {running ? (
           <span className="flex items-center justify-center gap-2">
@@ -360,3 +373,4 @@ export default function PomodoroTimer({
     </div>
   );
 }
+
