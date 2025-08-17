@@ -3,6 +3,7 @@ import cors from "cors";
 import authRoute from "./route/auth.route.js";
 import taigaRoute from "./route/taiga.route.js";
 import timerRoute from "./route/timer.route.js";
+import analystRoute from "./route/analyst.route.js";
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.get("/health", (req, res) => {
 app.use("/api/auth", authRoute);
 app.use("/api/taiga", taigaRoute);
 app.use("/api/timer", timerRoute);
+app.use("/api/analyst", analystRoute);
 
 // 404 handler
 app.use((req, res) => {
