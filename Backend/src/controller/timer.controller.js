@@ -347,13 +347,14 @@ export const completeTimer = async (req, res) => {
 export const resetTimer = async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const userId = req.user.id;
+    const { full_name, id } = req.user;
 
     const session = activeSessions.get(sessionId);
-    if (!session || session.userId !== userId) {
+
+    if (!session || session.userId !== id || session.status !== "active") {
       return res
         .status(404)
-        .json({ success: false, message: "Session not found" });
+        .json({ success: false, message: "Session not found or not active" });
     }
 
     activeSessions.delete(sessionId);
@@ -363,6 +364,13 @@ export const resetTimer = async (req, res) => {
       end_time: new Date().toISOString(),
       duration_minutes: session.duration_minutes.toFixed(2),
       interrupted: "True",
+    });
+    await sendDiscordMessage("Reset Session", {
+      name: full_name,
+      Title: session.taskName,
+      sessionId: sessionId,
+      startTime: Date.now(), // Can be Date or ISO string, desc: Reset time
+      status: "reset",
     });
 
     res.json({ success: true, message: "Session reset successfully" });
