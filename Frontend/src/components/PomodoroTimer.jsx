@@ -39,7 +39,7 @@ export default function PomodoroTimer({
 
   const start = async () => {
     if (loading) return;
-    if (!task?.id || !(task.name || task.subject) || !category) {
+    if (!task?.id || !(task.name || task.subject) || !category|| !project) {
       console.warn("Please select both task and category before starting.");
       return;
     }
@@ -78,6 +78,9 @@ export default function PomodoroTimer({
       }
     } catch (err) {
       console.error("Error starting timer:", err);
+    }
+    finally {
+      setLoading(false);
     }
   };
 
@@ -254,11 +257,10 @@ export default function PomodoroTimer({
 
       {/* Main Action Button */}
       <button
-        className={`w-full py-4 rounded-lg text-white font-semibold text-lg mb-4 transition-all duration-200 ${
-          running
+        className={`w-full py-4 rounded-lg text-white font-semibold text-lg mb-4 transition-all duration-200 ${running
             ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
             : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
-        } focus:outline-none shadow-lg`}
+          } focus:outline-none shadow-lg`}
         onClick={() => {
           if (!taskId || !taskName || !category) {
             setShowPopup(true);

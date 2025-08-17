@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { fetchProjects, fetchTasksByProject } from "../api/task";
 
 export default function TaskSelector({
+  selectedProject,
+  setSelectedProject,
   selectedTask,
   onTaskChange,
   selectedCategory,
@@ -9,7 +11,6 @@ export default function TaskSelector({
   isDarkMode = true,
 }) {
   const [projects, setProjects] = useState([]);
-  const [selectedProject, setSelectedProject] = useState("");
   const [tasks, setTasks] = useState([]);
   const categories = [
     { id: 1, name: "Planning & Requirements" },
