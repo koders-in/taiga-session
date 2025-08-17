@@ -43,11 +43,22 @@ const updateTaskStatus = async (taskId, status) => {
       },
     ];
 
-    const res = await axios.patch(updateUrl, updatePayload, { headers: nocoHeaders });
+    const res = await axios.patch(updateUrl, updatePayload, {
+      headers: nocoHeaders,
+    });
     return { success: true, data: res.data, taskId, status };
   } catch (err) {
-    console.error("Error updating task status in NocoDB:", err.response?.data || err.message);
-    return { success: false, error: err.message, response: err.response?.data, taskId, status };
+    console.error(
+      "Error updating task status in NocoDB:",
+      err.response?.data || err.message
+    );
+    return {
+      success: false,
+      error: err.message,
+      response: err.response?.data,
+      taskId,
+      status,
+    };
   }
 };
 
@@ -66,26 +77,28 @@ const updateSessionRecord = async (Id, updateData) => {
 // Start timer
 export const startTimer = async (req, res) => {
   try {
-<<<<<<< HEAD
-    const { task_Id, task_Name, category } = req.body;
-=======
     // Get task details from frontend
     const { task_Id, task_Name, category, duration_minutes, name, project } =
       req.body;
 
     // Get user ID from the authenticated user
->>>>>>> ba1f753d1b48c3a8df85cdd53dc9bb2a55a277c7
+
     const userId = req.user.id;
 
     if (!task_Id || !task_Name || !category) {
       return res.status(400).json({
         success: false,
-        message: "Missing required fields: task_Id, task_Name, and category are required",
+        message:
+          "Missing required fields: task_Id, task_Name, and category are required",
       });
     }
 
     // Prevent multiple active sessions for same user
-    if (Array.from(activeSessions.values()).some((s) => s.userId === userId && s.status === "active")) {
+    if (
+      Array.from(activeSessions.values()).some(
+        (s) => s.userId === userId && s.status === "active"
+      )
+    ) {
       return res.status(400).json({
         success: false,
         message: "You already have an active session",
@@ -95,18 +108,18 @@ export const startTimer = async (req, res) => {
     const sessionId = uuidv4();
     const startTime = new Date().toISOString();
 
-<<<<<<< HEAD
     // --- Check if task already exists ---
     let taskRecordId;
     const filterUrl = `${NOCODB_BASE_URL}/api/v2/tables/${TASKS_TABLE_ID}/records?where=(task_id,eq,${task_Id})~and(user_id,eq,${userId})`;
-    const existingTaskRes = await axios.get(filterUrl, { headers: nocoHeaders });
-=======
+    const existingTaskRes = await axios.get(filterUrl, {
+      headers: nocoHeaders,
+    });
+
     // console.log(`Creating new task for user ${userId}:`, {
     //   task_Id,
     //   task_Name,
     //   startTime,
     // });
->>>>>>> ba1f753d1b48c3a8df85cdd53dc9bb2a55a277c7
 
     if (existingTaskRes.data.list && existingTaskRes.data.list.length > 0) {
       taskRecordId = existingTaskRes.data.list[0].Id;
@@ -153,7 +166,7 @@ export const startTimer = async (req, res) => {
       status: "active",
       pauseStart: null,
       pauseDuration: 0,
-<<<<<<< HEAD
+
       lastResumeTime: new Date(),
       duration_minutes: 0,
       recordId: sessionRecordId, // 🔑 store DB record id
@@ -163,9 +176,9 @@ export const startTimer = async (req, res) => {
       Title: task_Name,
       sessionId,
       startTime,
-=======
+
       pauses: [],
-    };
+    });
 
     activeSessions.set(sessionId, newSession);
 
@@ -178,7 +191,7 @@ export const startTimer = async (req, res) => {
       Title: taskName,
       sessionId: sessionId,
       startTime: startTime, // Can be Date or ISO string
->>>>>>> ba1f753d1b48c3a8df85cdd53dc9bb2a55a277c7
+
       status: "active",
     });
 
@@ -204,7 +217,9 @@ export const startTimer = async (req, res) => {
     });
   } catch (err) {
     console.error("Start timer error:", err);
-    return res.status(500).json({ success: false, message: "Failed to start timer" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to start timer" });
   }
 };
 
@@ -216,11 +231,14 @@ export const pauseTimer = async (req, res) => {
 
     const session = activeSessions.get(sessionId);
     if (!session || session.userId !== userId || session.status !== "active") {
-      return res.status(404).json({ success: false, message: "Session not found or not active" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Session not found or not active" });
     }
 
     const now = new Date();
-    const workMs = now - (session.lastResumeTime || new Date(session.startTime));
+    const workMs =
+      now - (session.lastResumeTime || new Date(session.startTime));
     const workedMinutes = workMs / 60000;
 
     session.duration_minutes += workedMinutes;
@@ -232,7 +250,11 @@ export const pauseTimer = async (req, res) => {
       duration_minutes: session.duration_minutes.toFixed(2),
     });
 
-    res.json({ success: true, pausedAt: now, duration: session.duration_minutes });
+    res.json({
+      success: true,
+      pausedAt: now,
+      duration: session.duration_minutes,
+    });
   } catch (err) {
     console.error("Pause timer error:", err);
     res.status(500).json({ success: false, message: "Failed to pause timer" });
@@ -247,7 +269,9 @@ export const resumeTimer = async (req, res) => {
 
     const session = activeSessions.get(sessionId);
     if (!session || session.userId !== userId || session.status !== "Paused") {
-      return res.status(404).json({ success: false, message: "Session not found or not paused" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Session not found or not paused" });
     }
 
     session.status = "active";
@@ -272,14 +296,17 @@ export const completeTimer = async (req, res) => {
     const session = activeSessions.get(sessionId);
 
     if (!session || session.userId !== userId) {
-      return res.status(404).json({ success: false, message: "Session not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Session not found" });
     }
 
     const now = new Date();
     let totalMinutes = session.duration_minutes || 0;
 
     if (session.status === "active") {
-      const workMs = now - (session.lastResumeTime || new Date(session.startTime));
+      const workMs =
+        now - (session.lastResumeTime || new Date(session.startTime));
       totalMinutes += workMs / 60000;
     }
 
@@ -305,7 +332,9 @@ export const completeTimer = async (req, res) => {
     });
   } catch (err) {
     console.error("Complete timer error:", err);
-    return res.status(500).json({ success: false, message: "Failed to complete timer" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to complete timer" });
   }
 };
 
@@ -317,7 +346,9 @@ export const resetTimer = async (req, res) => {
 
     const session = activeSessions.get(sessionId);
     if (!session || session.userId !== userId) {
-      return res.status(404).json({ success: false, message: "Session not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Session not found" });
     }
 
     activeSessions.delete(sessionId);
@@ -326,7 +357,7 @@ export const resetTimer = async (req, res) => {
       status: "Cancelled",
       end_time: new Date().toISOString(),
       duration_minutes: session.duration_minutes.toFixed(2),
-      interrupted:"True",
+      interrupted: "True",
     });
 
     res.json({ success: true, message: "Session reset successfully" });

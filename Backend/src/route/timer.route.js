@@ -5,13 +5,13 @@ import {
   resumeTimer,
   completeTimer,
   resetTimer,
-} from "../controllers/timer.controller.js";
-import { authMiddleware } from "../middleware/auth.js";
+} from "./../controller/timer.controller.js";
+import { authenticate } from "../middleware/auth.js";
 
 const router = express.Router();
 
 // All routes require auth
-router.use(authMiddleware);
+router.use(authenticate);
 
 /**
  * @route   POST /timer/start
