@@ -109,36 +109,42 @@ export const userLogin = async (req, res) => {
             existingUser.Name !== userData.full_name ||
             existingUser.Email !== userData.email;
           
-          if (hasChanges) {
-            console.log(`User data changed for ${userData.email}. Updating record.`);
-            const updatePayload = {
-              Name: userData.full_name,
-              Email: userData.email
-            };
-
-            try {
-              await axios.patch(
-                `${nocoUsersUrl}/${existingUser.Id}`,
-                updatePayload,
+            if (hasChanges) {
+              console.log(`User data changed for ${userData.email}. Updating record.`);
+            
+              const updatePayload = [
                 {
-                  headers: {
-                    "Content-Type": "application/json",
-                    accept: "application/json",
-                    "xc-token": NOCODB_TOKEN,
-                  },
-                }
-              );
-              nocoUser = { ...existingUser, ...updatePayload };
-              console.log(`Successfully updated user ${userData.email}`);
-            } catch (updateError) {
-              console.error(`Failed to update user ${userData.email}:`, updateError);
-              // Continue with existing user data if update fails
+                  Id: existingUser.Id,
+                  Name: userData.full_name,
+                  Email: userData.email,
+                },
+              ];
+            
+              try {
+                await axios.patch(
+                  nocoUsersUrl,          
+                  updatePayload,
+                  {
+                    headers: {
+                      "Content-Type": "application/json",
+                      accept: "application/json",
+                      "xc-token": NOCODB_TOKEN,
+                    },
+                  }
+                );
+            
+                nocoUser = { ...existingUser, ...updatePayload[0] };
+                console.log(`Successfully updated user ${userData.email}`);
+              } catch (updateError) {
+                console.error(`Failed to update user ${userData.email}:`, updateError.response?.data || updateError.message);
+                // Continue with existing user data if update fails
+                nocoUser = existingUser;
+              }
+            } else {
+              console.log(`No changes detected for user ${userData.email}. Skipping update.`);
               nocoUser = existingUser;
             }
-          } else {
-            console.log(`No changes detected for user ${userData.email}. Skipping update.`);
-            nocoUser = existingUser;
-          }
+            
         }
 
         return res.status(200).json({
