@@ -2,7 +2,7 @@ import { getToken } from "./login";
 
 const API_BASE = "http://localhost:4000/api/timer";
 
-export async function startTimer(taskId, taskName, category, name) {
+export async function startTimer(taskId, taskName, category, name, project) {
   const token = getToken();
 
   if (!token || !taskId || !taskName || !category) {
@@ -21,6 +21,7 @@ export async function startTimer(taskId, taskName, category, name) {
         task_Id: taskId,
         task_Name: taskName,
         category: category,
+        project: project,
       }),
     });
     return await res.json();

@@ -13,8 +13,9 @@ export default function PomodoroTimer({
   onSessionComplete,
   isDarkMode = true,
   name,
+  project,
 }) {
-  const task = { id: taskId, name: taskName, username: name };
+  const task = { id: taskId, name: taskName, username: name, project };
   const WORK_DEFAULT = 25 * 60;
   const [secondsLeft, setSecondsLeft] = useState(WORK_DEFAULT);
   const [running, setRunning] = useState(false);
@@ -50,13 +51,15 @@ export default function PomodoroTimer({
         taskName: task.name || task.subject,
         c: category,
         username: task.username,
+        project: project,
       };
       console.log(resOnj);
       const res = await startTimer(
         task.id,
         task.name || task.subject,
         category,
-        task.username
+        task.username,
+        project
       );
       console.log("Start API response:", res);
       const sid =
@@ -251,10 +254,11 @@ export default function PomodoroTimer({
 
       {/* Main Action Button */}
       <button
-        className={`w-full py-4 rounded-lg text-white font-semibold text-lg mb-4 transition-all duration-200 ${running
-          ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
-          : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
-          } focus:outline-none shadow-lg`}
+        className={`w-full py-4 rounded-lg text-white font-semibold text-lg mb-4 transition-all duration-200 ${
+          running
+            ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
+            : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
+        } focus:outline-none shadow-lg`}
         onClick={() => {
           if (!taskId || !taskName || !category) {
             setShowPopup(true);
@@ -293,15 +297,20 @@ export default function PomodoroTimer({
 
       {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
-          <div className={`rounded-2xl w-80 text-center p-6 ${themeStyles.popupContainer}`}>
+          <div
+            className={`rounded-2xl w-80 text-center p-6 ${themeStyles.popupContainer}`}
+          >
             {/* Title */}
-            <h2 className={`text-lg font-semibold mb-2 ${themeStyles.popupTitle}`}>
+            <h2
+              className={`text-lg font-semibold mb-2 ${themeStyles.popupTitle}`}
+            >
               Selection Needed
             </h2>
 
             {/* Message */}
             <p className={`text-sm mb-6 ${themeStyles.popupMessage}`}>
-              You need to pick a task and category before starting your session...
+              You need to pick a task and category before starting your
+              session...
             </p>
 
             {/* Divider */}

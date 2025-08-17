@@ -6,7 +6,7 @@ export default function TaskSelector({
   onTaskChange,
   selectedCategory,
   onCategoryChange,
-  isDarkMode = true
+  isDarkMode = true,
 }) {
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState("");
@@ -21,12 +21,13 @@ export default function TaskSelector({
     { id: 7, name: "Documentation & Knowledge Baset" },
     { id: 8, name: "Stakeholder/Client/Team Communicationt" },
     { id: 9, name: "HR & Administration" },
-    { id: 10, name: "Support & Maintenance" }
+    { id: 10, name: "Support & Maintenance" },
   ];
 
   // Fetch projects
   useEffect(() => {
     const cachedProjects = localStorage.getItem("projects");
+    console.log(cachedProjects);
 
     if (cachedProjects) {
       setProjects(JSON.parse(cachedProjects));
@@ -84,7 +85,11 @@ export default function TaskSelector({
       >
         <option value="">Select a project</option>
         {projects.map((p) => (
-          <option key={p.id} value={p.id} className={themeStyles.dropdownOption}>
+          <option
+            key={p.id}
+            value={p.id}
+            className={themeStyles.dropdownOption}
+          >
             {p.name}
           </option>
         ))}
@@ -102,7 +107,11 @@ export default function TaskSelector({
       >
         <option value="">Select a task</option>
         {tasks.map((t) => (
-          <option key={t.id} value={t.id} className={themeStyles.dropdownOption}>
+          <option
+            key={t.id}
+            value={t.id}
+            className={themeStyles.dropdownOption}
+          >
             {t.subject}
           </option>
         ))}
@@ -116,7 +125,11 @@ export default function TaskSelector({
       >
         <option value="">Select a category</option>
         {categories.map((c) => (
-          <option key={c.id} value={c.name} className={themeStyles.dropdownOption}>
+          <option
+            key={c.id}
+            value={c.name}
+            className={themeStyles.dropdownOption}
+          >
             {c.name}
           </option>
         ))}
@@ -124,4 +137,3 @@ export default function TaskSelector({
     </div>
   );
 }
-

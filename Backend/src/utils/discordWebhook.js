@@ -21,6 +21,7 @@ function formatName(rawName) {
 }
 
 export async function sendDiscordMessage(content, embedData = null) {
+  console.log({ embedData });
   try {
     const payload = {
       content: content,
@@ -51,10 +52,19 @@ export async function sendDiscordMessage(content, embedData = null) {
           author: {
             name: `🔴 ${formatName(embedData.name)}` || "Pomodoro Timer",
           },
-          title: `📝 Task: ${embedData.title || embedData.Title || "No Task"}`,
           color: color,
 
           fields: [
+            embedData.project && {
+              name: "📂 Project",
+              value: embedData.project,
+              inline: false,
+            },
+            {
+              name: "📝 Task",
+              value: embedData.title || embedData.Title || "No Task",
+              inline: false,
+            },
             embedData.sessionId && {
               name: "🆔 Session",
               value: `\`${embedData.sessionId}\``,

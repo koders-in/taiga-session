@@ -126,6 +126,7 @@ export default function PomodoroTimerPage({}) {
             category={selectedCategory}
             isDarkMode={isDarkMode}
             name={name}
+            // project={project}
             onSessionComplete={() => {
               // refresh data when session completes
             }}

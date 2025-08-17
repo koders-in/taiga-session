@@ -224,9 +224,9 @@ const updateSessionRecord = async (sessionData) => {
 export const startTimer = async (req, res) => {
   try {
     // Get task details from frontend
-    const { task_Id, task_Name, category, duration_minutes, name } = req.body;
-    console.log("Wrokringssssssssssssssssssssssssssssssssssssssssssss");
-    console.log(name);
+    const { task_Id, task_Name, category, duration_minutes, name, project } =
+      req.body;
+
     // Get user ID from the authenticated user
     const userId = req.user.id;
 
@@ -335,6 +335,7 @@ export const startTimer = async (req, res) => {
       sessionId: sessionId,
       startTime: startTime, // Can be Date or ISO string
       status: "active",
+      project: project,
     });
 
     return res.status(201).json({
