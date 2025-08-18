@@ -4,7 +4,7 @@ const TAIGA_API_URL =
   process.env.TAIGA_API_URL || "https://taiga.koders.in/api/v1";
 
 // Helper function to make authenticated requests to Taiga API
-const makeTaigaRequest = async (token, method, endpoint, data = null) => {
+export const makeTaigaRequest = async (token, method, endpoint, data = null) => {
   try {
     const config = {
       method,

@@ -2,6 +2,8 @@ import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { sendDiscordMessage } from "../utils/discordWebhook.js";
 
+import { makeTaigaRequest } from "./taiga.controller.js";
+
 // In-memory storage for active sessions
 const activeSessions = new Map();
 
@@ -172,6 +174,23 @@ export const startTimer = async (req, res) => {
       recordId: sessionRecordId, // 🔑 store DB record id
     });
 
+    // --- Fetch project name from Taiga if project ID is provided ---
+    let projectName = project || "Unknown Project"; // default
+
+    if (project) {
+      try {
+        const token = req.token; // user token from request
+        const projectData = await makeTaigaRequest(
+          token,
+          "get",
+          `/projects/${project}`
+        );
+        projectName = projectData?.name || "Unknown Project";
+      } catch (err) {
+        console.error("Failed to fetch project name from Taiga:", err.message);
+      }
+    }
+
     // webHook send msg on discord'
 
     await sendDiscordMessage("Session started", {
@@ -180,7 +199,7 @@ export const startTimer = async (req, res) => {
       sessionId: sessionId,
       startTime: startTime, // Can be Date or ISO string
       status: "active",
-      project: project,
+      project: projectName,
     });
 
     return res.status(201).json({
