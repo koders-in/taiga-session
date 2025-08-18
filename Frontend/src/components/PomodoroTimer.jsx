@@ -16,16 +16,24 @@ export default function PomodoroTimer({
   name,
   project,
 }) {
+
+
   const task = { id: taskId, name: taskName, username: name, project };
   const WORK_DEFAULT = 25 * 60;
+  const SHORT_BREAK = 5 * 60;
+  const LONG_BREAK = 15 * 60;
   const [secondsLeft, setSecondsLeft] = useState(WORK_DEFAULT);
   const [running, setRunning] = useState(false);
   const [sessionId, setSessionId] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isBreak, setIsBreak] = useState(false);
+  const [breakCount, setBreakCount] = useState(0);
+
 
   useEffect(() => {
+
     let interval;
     if (running && secondsLeft > 0) {
       interval = setInterval(() => {
@@ -33,10 +41,30 @@ export default function PomodoroTimer({
       }, 1000);
     } else if (secondsLeft === 0 && running) {
       setRunning(false);
-      if (onSessionComplete) onSessionComplete();
+      if (isBreak) {
+        //  Break ended → Start new Work session
+        setIsBreak(false);
+        setSecondsLeft(WORK_DEFAULT);
+        setRunning(true);
+      } else {
+        //  Work session ended
+        if (onSessionComplete) onSessionComplete();
+
+        if (breakCount === 2) {
+          // after 3rd work session → long break
+          setSecondsLeft(LONG_BREAK);
+          setBreakCount(0);
+        } else {
+          // short break
+          setSecondsLeft(SHORT_BREAK);
+          setBreakCount((prev) => prev + 1);
+        }
+        setIsBreak(true);
+        setRunning(true);
+      }
     }
     return () => clearInterval(interval);
-  }, [running, secondsLeft, onSessionComplete]);
+  }, [running, secondsLeft, isBreak, breakCount, onSessionComplete]);
 
   const start = async () => {
     if (loading) return;
@@ -152,9 +180,28 @@ export default function PomodoroTimer({
     } finally {
       setRunning(false);
       setIsPaused(false);
-      setSecondsLeft(WORK_DEFAULT);
       setSessionId(null);
-      if (onSessionComplete) onSessionComplete();
+
+      if (isBreak) {
+        setIsBreak(false);
+        -     setSecondsLeft(WORK_DEFAULT);
+        -     setRunning(true);
+        +     setIsBreak(false);
+        +     start();
+      } else {
+
+        if (onSessionComplete) onSessionComplete();
+
+        if (breakCount === 2) {
+          setSecondsLeft(LONG_BREAK);
+          setBreakCount(0);
+        } else {
+          setSecondsLeft(SHORT_BREAK);
+          setBreakCount((prev) => prev + 1);
+        }
+        setIsBreak(true);
+        setRunning(true);
+      }
     }
   };
 
@@ -166,8 +213,11 @@ export default function PomodoroTimer({
     return `${m}:${s}`;
   };
 
-  // Calculate progress percentage for the circular progress
-  const progress = ((WORK_DEFAULT - secondsLeft) / WORK_DEFAULT) * 100;
+  const currentDuration = isBreak
+    ? (breakCount === 0 ? LONG_BREAK : SHORT_BREAK) // if breakCount just reset → long break
+    : WORK_DEFAULT;
+
+  const progress = ((currentDuration - secondsLeft) / currentDuration) * 100;
 
   // Theme-based styles
   const themeStyles = {
@@ -266,7 +316,7 @@ export default function PomodoroTimer({
             {running ? (
               <span className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                Running
+                {isBreak ? (breakCount === 0 ? "Long Break" : "Short Break") : "Working"}
               </span>
             ) : (
               "Ready to start"
@@ -385,6 +435,26 @@ export default function PomodoroTimer({
             Complete
           </span>
         </button>
+        {isBreak && (
+          <button
+            className="flex-1 bg-purple-600 hover:bg-purple-700 border border-purple-500 text-white py-3 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
+            onClick={() => {
+              //  Skip break → go back to work session
+              setIsBreak(false);
+              setSecondsLeft(WORK_DEFAULT);
+              setRunning(true);
+              setIsBreak(false);
+              start(); //  Create new session properly
+            }}
+          >
+            <span className="flex items-center justify-center gap-2">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              Skip Break
+            </span>
+          </button>
+        )}
       </div>
 
       {/* Timer Statistics */}
