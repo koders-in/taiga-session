@@ -71,7 +71,7 @@ export default function PomodoroTimer({
         //  Break started send API
         try {
           startBreak(sessionId);
-          playBeep();
+          playDing();
         } catch (err) {
           console.error("[Frontend] Break start API failed:", err);
         }
@@ -92,27 +92,29 @@ export default function PomodoroTimer({
     }
   };
 
-  const playBeep = () => {
+  const playDing = () => {
     try {
       initAudio();
 
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
+      const makeTone = (freq, vol, dur) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + dur);
+      };
 
-      oscillator.type = "sine";
-      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      makeTone(880, 0.15, 1.5);  // fundamental
+      makeTone(1320, 0.07, 1.2); // overtone
 
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-
-      oscillator.start();
-      oscillator.stop(audioCtx.currentTime + 0.5);
-    } catch (err) {
-      console.error("Beep sound failed:", err);
+    } catch (e) {
+      console.error("Soft ding failed:", e);
     }
   };
-
 
   const start = async () => {
     if (loading) return;
@@ -156,7 +158,7 @@ export default function PomodoroTimer({
         setRunning(true);
         setIsPaused(false);
         setSecondsLeft(WORK_DEFAULT);
-        playBeep();
+        playDing();
       } else {
         console.error(" [Frontend] Start timer failed:", res);
       }
@@ -230,7 +232,7 @@ export default function PomodoroTimer({
       setRunning(false);
       setIsPaused(false);
       setSessionId(null);
-      playBeep();
+      playDing();
 
       if (isBreak) {
         //  Break ending manually
@@ -387,8 +389,8 @@ export default function PomodoroTimer({
       {!isBreak && (
         <button
           className={`w-full py-4 rounded-lg text-white font-semibold text-lg mb-4 transition-all duration-200 ${running
-              ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
-              : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
+            ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
+            : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
             } focus:outline-none shadow-lg`}
           onClick={() => {
             if (!taskId || !taskName || !category) {
