@@ -5,6 +5,8 @@ import {
   resumeTimer,
   completeTimer,
   resetTimer,
+  breakTImer,
+  endBreakTimer,
 } from "./../controller/timer.controller.js";
 import { authenticate } from "../middleware/auth.js";
 
@@ -54,5 +56,21 @@ router.patch("/complete/:sessionId", completeTimer);
  * @return  { message }
  */
 router.patch("/reset/:sessionId", resetTimer);
+
+/**
+ * @route   POST /endbreak
+ * @desc    Break message
+ * @params  sessionId
+ * @return  { message }
+ */
+router.post("/break", breakTImer);
+
+/**
+ * @route   POST /endbreak
+ * @desc    Break message
+ * @params  sessionId
+ * @return  { message }
+ */
+router.post("/endbreak", endBreakTimer);
 
 export default router;

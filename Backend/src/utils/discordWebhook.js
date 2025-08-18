@@ -3,7 +3,6 @@ import axios from "axios";
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
 // desc: Helper Function formats name, TODO: Save this Function in a different folder
-
 function formatName(rawName) {
   if (!rawName) return "";
 
@@ -46,8 +45,12 @@ export async function sendDiscordMessage(content, embedData = null) {
           color = 15158332; // red
         } else if (statusLower === "completed") {
           color = 3447003; // blue
+        } else if (statusLower === "break") {
+          color = 10181046; // purple
         }
       }
+
+      const isBreak = embedData.status?.toLowerCase() === "break";
 
       payload.embeds = [
         {
@@ -62,11 +65,13 @@ export async function sendDiscordMessage(content, embedData = null) {
               value: embedData.project,
               inline: false,
             },
-            {
-              name: "📝 Task",
-              value: embedData.title || embedData.Title || "No Task",
-              inline: false,
-            },
+            // ✅ Only show Task if NOT a break AND a task exists
+            !isBreak &&
+              (embedData.title || embedData.Title) && {
+                name: "📝 Task",
+                value: embedData.title || embedData.Title,
+                inline: false,
+              },
             embedData.sessionId && {
               name: "🆔 Session",
               value: `\`${embedData.sessionId}\``,
@@ -86,7 +91,7 @@ export async function sendDiscordMessage(content, embedData = null) {
 
           timestamp: new Date(),
           footer: {
-            text: "⏱ Stay focused!",
+            text: isBreak ? "☕ Take a break!" : "⏱ Stay focused!",
           },
         },
       ];

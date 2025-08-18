@@ -382,3 +382,55 @@ export const resetTimer = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to reset timer" });
   }
 };
+
+export const breakTImer = async (req, res) => {
+  try {
+    const { full_name, id } = req.user;
+
+    console.log("Break timer triggered by:", full_name, id);
+
+    await sendDiscordMessage("☕ Break Started", {
+      name: full_name,
+      startTime: Date.now(), // break start time
+      status: "break",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Break timer notification sent to Discord",
+    });
+  } catch (error) {
+    console.error("Error in breakTimer:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send break timer notification",
+      error: error.message,
+    });
+  }
+};
+
+export const endBreakTimer = async (req, res) => {
+  try {
+    const { full_name, id } = req.user;
+
+    console.log("Break ended by:", full_name, id);
+
+    await sendDiscordMessage("✅ Break Ended", {
+      name: full_name,
+      startTime: Date.now(), // when the break ended
+      status: "break-ended",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Break end notification sent to Discord",
+    });
+  } catch (error) {
+    console.error("Error in endBreakTimer:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send break end notification",
+      error: error.message,
+    });
+  }
+};
