@@ -287,7 +287,8 @@ export const resumeTimer = async (req, res) => {
 // Complete timer
 export const completeTimer = async (req, res) => {
   try {
-    const { auto } = req.body;
+    // Default auto = false if not provided
+    const { auto = false } = req.body || {};
 
     const { sessionId } = req.params;
     const { full_name, id } = req.user;
@@ -321,13 +322,15 @@ export const completeTimer = async (req, res) => {
     if (!auto) {
       await updateTaskStatus(session.taskId, "Completed");
     }
+
     await sendDiscordMessage("Complete Session", {
       name: full_name,
       Title: session.taskName,
       sessionId: sessionId,
-      startTime: Date.now(), // Can be Date or ISO string
+      startTime: Date.now(),
       status: "completed",
     });
+
     return res.json({
       success: true,
       endTime: now,
