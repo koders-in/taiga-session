@@ -5,6 +5,8 @@ import {
   resumeTimer,
   completeTimer,
   resetTimer,
+   startBreak,  
+  endBreak, 
 } from "../api/timer";
 
 export default function PomodoroTimer({
@@ -32,7 +34,7 @@ export default function PomodoroTimer({
   const [breakCount, setBreakCount] = useState(0);
 
 
-  useEffect(() => {
+useEffect(() => {
 
     let interval;
     if (running && secondsLeft > 0) {
@@ -42,7 +44,12 @@ export default function PomodoroTimer({
     } else if (secondsLeft === 0 && running) {
       setRunning(false);
       if (isBreak) {
-        //  Break ended → Start new Work session
+        //  Break ended Start new Work session
+        try {
+          endBreak(sessionId);
+        } catch (err) {
+          console.error("[Frontend] Break end API failed:", err);
+        }
         setIsBreak(false);
         setSecondsLeft(WORK_DEFAULT);
         setRunning(true);
@@ -50,8 +57,8 @@ export default function PomodoroTimer({
         //  Work session ended
         if (onSessionComplete) onSessionComplete();
 
-        if (breakCount === 2) {
-          // after 3rd work session → long break
+        if (breakCount === 3) {
+          // after 4rd work session → long break
           setSecondsLeft(LONG_BREAK);
           setBreakCount(0);
         } else {
@@ -61,10 +68,16 @@ export default function PomodoroTimer({
         }
         setIsBreak(true);
         setRunning(true);
+        //  Break started send API
+        try {
+          startBreak(sessionId);
+        } catch (err) {
+          console.error("[Frontend] Break start API failed:", err);
+        }
       }
     }
     return () => clearInterval(interval);
-  }, [running, secondsLeft, isBreak, breakCount, onSessionComplete]);
+  }, [running, secondsLeft, isBreak, breakCount, onSessionComplete, sessionId]);
 
   const start = async () => {
     if (loading) return;
@@ -183,13 +196,15 @@ export default function PomodoroTimer({
       setSessionId(null);
 
       if (isBreak) {
+        //  Break ending manually
+        try {
+          endBreak(sessionId);
+        } catch (err) {
+          console.error("[Frontend] Break end API failed:", err);
+        }
         setIsBreak(false);
-        -     setSecondsLeft(WORK_DEFAULT);
-        -     setRunning(true);
-        +     setIsBreak(false);
-        +     start();
+          start();
       } else {
-
         if (onSessionComplete) onSessionComplete();
 
         if (breakCount === 2) {
@@ -201,6 +216,12 @@ export default function PomodoroTimer({
         }
         setIsBreak(true);
         setRunning(true);
+        //  Break started send API
+        try {
+          startBreak(sessionId);
+        } catch (err) {
+          console.error("[Frontend] Break start API failed:", err);
+        }
       }
     }
   };
@@ -214,8 +235,8 @@ export default function PomodoroTimer({
   };
 
   const currentDuration = isBreak
-    ? (breakCount === 0 ? LONG_BREAK : SHORT_BREAK) // if breakCount just reset → long break
-    : WORK_DEFAULT;
+    ? (breakCount === 0 ? LONG_BREAK : SHORT_BREAK) // if breakCount just reset long break
+  : WORK_DEFAULT;
 
   const progress = ((currentDuration - secondsLeft) / currentDuration) * 100;
 
@@ -330,9 +351,9 @@ export default function PomodoroTimer({
         <button
           className={`w-full py-4 rounded-lg text-white font-semibold text-lg mb-4 transition-all duration-200 ${
             running
-              ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
-              : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
-          } focus:outline-none shadow-lg`}
+            ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
+            : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
+            } focus:outline-none shadow-lg`}
           onClick={() => {
             if (!taskId || !taskName || !category) {
               setShowPopup(true);
@@ -372,7 +393,7 @@ export default function PomodoroTimer({
             </span>
           )}
         </button>
- )}
+      )}
       {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
           <div
@@ -442,12 +463,18 @@ export default function PomodoroTimer({
           <button
             className="flex-1 bg-purple-600 hover:bg-purple-700 border border-purple-500 text-white py-3 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
             onClick={() => {
-              setIsBreak(false);
-              setSecondsLeft(WORK_DEFAULT);
-              setRunning(true);
-              start(); // start new work session
-            }}
-          >
+             // Break skipped → call endBreak
+            try {
+              endBreak(sessionId);
+            } catch (err) {
+              console.error("[Frontend] Break end API failed:", err);
+            }
+            setIsBreak(false);
+            setSecondsLeft(WORK_DEFAULT);
+            setRunning(true);
+            start();
+          }}
+        >
             <span className="flex items-center justify-center gap-2">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />

@@ -120,3 +120,37 @@ export async function completeTimer(sessionId) {
     return { success: false, message: "Request failed" };
   }
 }
+
+export async function startBreak() {
+  const token = getToken();
+  try {
+    const res = await fetch(`${API_BASE}/break`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return await res.json();
+  } catch (error) {
+    console.error("Error starting break:", error);
+    return { success: false, message: "Request failed" };
+  }
+}
+
+export async function endBreak() {
+  const token = getToken();
+  try {
+    const res = await fetch(`${API_BASE}/endbreak`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return await res.json();
+  } catch (error) {
+    console.error("Error ending break:", error);
+    return { success: false, message: "Request failed" };
+  }
+}
