@@ -325,59 +325,54 @@ export default function PomodoroTimer({
         </div>
       </div>
 
-      {/* Main Action Button */}
-      <button
-        className={`w-full py-4 rounded-lg text-white font-semibold text-lg mb-4 transition-all duration-200 ${running
-          ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
-          : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
+      {/* Main Action Button → hidden during break */}
+      {!isBreak && (
+        <button
+          className={`w-full py-4 rounded-lg text-white font-semibold text-lg mb-4 transition-all duration-200 ${
+            running
+              ? "bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-500/50"
+              : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
           } focus:outline-none shadow-lg`}
-        onClick={() => {
-          console.log("[Button Clicked]");
-          console.log(" Current State:", { running, isPaused, loading });
-          console.log("Task Info:", { taskId, taskName, category });
-          if (!taskId || !taskName || !category) {
-            console.warn("Missing required fields → showing popup");
-            setShowPopup(true);
-            return;
-          }
+          onClick={() => {
+            if (!taskId || !taskName || !category) {
+              setShowPopup(true);
+              return;
+            }
 
-          if (running) {
-            console.log("Running = true → calling pause()");
-            pause();
-          } else if (isPaused) {
-            console.log(" isPaused = true → calling resume()");
-            resume();
-          } else {
-            console.log("Starting new session → calling start()");
-            start();
-          }
-        }}
-        disabled={loading}
-      >
-        {running ? (
-          <span className="flex items-center justify-center gap-2">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-            </svg>
-            Pause
-          </span>
-        ) : isPaused ? (
-          <span className="flex items-center justify-center gap-2">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="m7 4 10 6L7 16V4z" />
-            </svg>
-            Resume
-          </span>
-        ) : (
-          <span className="flex items-center justify-center gap-2">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="m7 4 10 6L7 16V4z" />
-            </svg>
-            Start Session
-          </span>
-        )}
-      </button>
-
+            if (running) {
+              pause();
+            } else if (isPaused) {
+              resume();
+            } else {
+              start();
+            }
+          }}
+          disabled={loading}
+        >
+          {running ? (
+            <span className="flex items-center justify-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+              </svg>
+              Pause
+            </span>
+          ) : isPaused ? (
+            <span className="flex items-center justify-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="m7 4 10 6L7 16V4z" />
+              </svg>
+              Resume
+            </span>
+          ) : (
+            <span className="flex items-center justify-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="m7 4 10 6L7 16V4z" />
+              </svg>
+              Start Session
+            </span>
+          )}
+        </button>
+ )}
       {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
           <div
@@ -412,39 +407,45 @@ export default function PomodoroTimer({
 
       {/* Secondary Action Buttons */}
       <div className="flex gap-3 w-full">
-        <button
-          className={`flex-1 ${themeStyles.resetButton} border py-3 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2`}
-          onClick={reset}
-        >
-          <span className="flex items-center justify-center gap-2">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
-            </svg>
-            Reset
-          </span>
-        </button>
-        <button
-          className="flex-1 bg-blue-600 hover:bg-blue-700 border border-blue-500 text-white py-3 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-          onClick={handleComplete}
-          disabled={!running && secondsLeft === WORK_DEFAULT}
-        >
-          <span className="flex items-center justify-center gap-2">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-            </svg>
-            Complete
-          </span>
-        </button>
+        {/* Work mode → show Reset + Complete */}
+        {!isBreak && (
+          <>
+            <button
+              className={`flex-1 ${themeStyles.resetButton} border py-3 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2`}
+              onClick={reset}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
+                </svg>
+                Reset
+              </span>
+            </button>
+
+            <button
+              className="flex-1 bg-blue-600 hover:bg-blue-700 border border-blue-500 text-white py-3 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onClick={handleComplete}
+              disabled={!running && secondsLeft === WORK_DEFAULT}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                </svg>
+                Complete
+              </span>
+            </button>
+          </>
+        )}
+
+        {/* Break mode */}
         {isBreak && (
           <button
             className="flex-1 bg-purple-600 hover:bg-purple-700 border border-purple-500 text-white py-3 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
             onClick={() => {
-              //  Skip break → go back to work session
               setIsBreak(false);
               setSecondsLeft(WORK_DEFAULT);
               setRunning(true);
-              setIsBreak(false);
-              start(); //  Create new session properly
+              start(); // start new work session
             }}
           >
             <span className="flex items-center justify-center gap-2">
@@ -461,4 +462,3 @@ export default function PomodoroTimer({
     </div>
   );
 }
-
