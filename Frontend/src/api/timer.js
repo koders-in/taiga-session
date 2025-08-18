@@ -9,6 +9,17 @@ export async function startTimer(taskId, taskName, category, name, project) {
     return { success: false, message: "Missing token, taskId, or taskName" };
   }
 
+  // build backend-compatible payload
+  const payload = {
+    task_Id: taskId,    
+    task_Name: taskName, 
+    category: category,
+    name: name,
+    project: project
+  };
+
+  console.log(" Sending Start Timer Payload:", payload);
+
   try {
     const res = await fetch(`${API_BASE}/start`, {
       method: "POST",
@@ -16,20 +27,18 @@ export async function startTimer(taskId, taskName, category, name, project) {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        name: name,
-        task_Id: taskId,
-        task_Name: taskName,
-        category: category,
-        project: project,
-      }),
+      body: JSON.stringify(payload),
     });
-    return await res.json();
+
+    const data = await res.json();
+    console.log(" Start Timer API Response:", data);
+    return data;
   } catch (error) {
-    console.error("Error starting timer:", error);
+    console.error(" Error starting timer:", error);
     return { success: false, message: "Request failed" };
   }
 }
+
 
 export async function pauseTimer(sessionId) {
   const token = getToken();
@@ -39,7 +48,7 @@ export async function pauseTimer(sessionId) {
 
   try {
     const res = await fetch(`${API_BASE}/pause/${sessionId}`, {
-      method: "POST",
+      method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -59,7 +68,7 @@ export async function resumeTimer(sessionId) {
 
   try {
     const res = await fetch(`${API_BASE}/resume/${sessionId}`, {
-      method: "POST",
+      method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -79,7 +88,7 @@ export async function resetTimer(sessionId) {
 
   try {
     const res = await fetch(`${API_BASE}/reset/${sessionId}`, {
-      method: "POST",
+      method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -100,7 +109,7 @@ export async function completeTimer(sessionId) {
 
   try {
     const res = await fetch(`${API_BASE}/complete/${sessionId}`, {
-      method: "POST",
+      method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
       },

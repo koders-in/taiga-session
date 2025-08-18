@@ -48,12 +48,13 @@ export default function PomodoroTimer({
     try {
       setLoading(true);
       const resOnj = {
-        id: task.id,
-        taskName: task.name || task.subject,
-        c: category,
-        username: task.username,
+        task_Id: task.id,
+        task_Name: task.name || task.subject,
+        category: category,
+        name: task.username,
         project: project,
       };
+      console.log(" [Frontend] Start Timer Payload:", resOnj);
       console.log(resOnj);
       const res = await startTimer(
         task.id,
@@ -62,28 +63,34 @@ export default function PomodoroTimer({
         task.username,
         project
       );
-      console.log("Start API response:", res);
+
+      console.log("[Frontend] Raw StartTimer Response:", res);
+
       const sid =
         res?.sessionId ||
         res?.session_id ||
         res?.data?.sessionId ||
         res?.data?.session_id;
 
+
+      console.log(" [Frontend] Extracted Session ID:", sid);
       if (res?.success && sid) {
+        console.log(" [Frontend] Timer started successfully!");
         setSessionId(sid);
         setRunning(true);
         setIsPaused(false);
         setSecondsLeft(WORK_DEFAULT);
       } else {
-        console.error("Start timer failed:", res);
+        console.error(" [Frontend] Start timer failed:", res);
       }
     } catch (err) {
-      console.error("Error starting timer:", err);
+      console.error("[Frontend] Error starting timer:", err);
     }
     finally {
       setLoading(false);
     }
   };
+
 
   const pause = async () => {
     if (!sessionId) return;
@@ -275,14 +282,25 @@ export default function PomodoroTimer({
           : "bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/50"
           } focus:outline-none shadow-lg`}
         onClick={() => {
+          console.log("[Button Clicked]");
+          console.log(" Current State:", { running, isPaused, loading });
+          console.log("Task Info:", { taskId, taskName, category });
           if (!taskId || !taskName || !category) {
+            console.warn("Missing required fields → showing popup");
             setShowPopup(true);
             return;
           }
 
-          if (running) pause();
-          else if (isPaused) resume();
-          else start();
+          if (running) {
+            console.log("Running = true → calling pause()");
+            pause();
+          } else if (isPaused) {
+            console.log(" isPaused = true → calling resume()");
+            resume();
+          } else {
+            console.log("Starting new session → calling start()");
+            start();
+          }
         }}
         disabled={loading}
       >
