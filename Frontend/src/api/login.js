@@ -1,3 +1,4 @@
+
 import axios from "axios";
 
 const API_URL = "http://localhost:4000/api/auth/";
@@ -26,6 +27,7 @@ export const Login = async (username, password) => {
     const email = user?.email || null; // return backend response
     const photo = user?.photo || null;
     const name = user?.full_name;
+    const userId = user?.id || user?.user_id || null;
     if (token) {
       setAuthToken(token);
       if (email) {
@@ -44,12 +46,19 @@ export const Login = async (username, password) => {
       } else {
         localStorage.removeItem("name");
       }
+      if (userId) {
+        localStorage.setItem("id", userId);
+      } else {
+        localStorage.removeItem("id");
+      }
+
+
     } else {
       console.warn("No token received from the backend");
     }
 
     console.log({ token });
-    return { message, refreshtoken, email, photo };
+    return { message, refreshtoken, email, photo, userId };
   } catch (error) {
     console.error("API Error:", error.response?.data || error.message);
     throw error;

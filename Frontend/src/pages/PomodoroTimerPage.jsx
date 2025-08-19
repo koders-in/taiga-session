@@ -6,7 +6,7 @@ import PerDayWork from "../components/PerDayWork";
 import SessionLog from "../components/SessionLog";
 import { logout } from "../api/login";
 
-export default function PomodoroTimerPage({}) {
+export default function PomodoroTimerPage({ }) {
   const [userEmail, setUserEmail] = useState("");
   const [userPhoto, setUserPhoto] = useState("");
   const [selectedProject, setSelectedProject] = useState("");
@@ -15,7 +15,8 @@ export default function PomodoroTimerPage({}) {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [name, setName] = useState("");
   const [activeTab, setActiveTab] = useState("focus"); // Track active tab
-
+  const [userId, setUserId] = useState(null);
+  const userID = localStorage.getItem("userId");
   // Create ref for session log section
   const sessionLogRef = useRef(null);
 
@@ -23,6 +24,7 @@ export default function PomodoroTimerPage({}) {
     const email = localStorage.getItem("email");
     const photo = localStorage.getItem("photo");
     const name = localStorage.getItem("name");
+    const id = localStorage.getItem("userId");
     if (email) {
       setUserEmail(email);
     }
@@ -32,7 +34,9 @@ export default function PomodoroTimerPage({}) {
     if (name) {
       setName(name);
     }
+    if (id) setUserId(id);
   }, []);
+
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -183,117 +187,9 @@ export default function PomodoroTimerPage({}) {
             </div>
           </div>
 
-          {/* Middle: Weekly/small stats + Per Day Work */}
+          {/* Analysis section */}
           <div className={`${themeClasses.card} p-4 rounded-lg`}>
-            {/* Header with stats and date selector */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-4">
-              <div>
-                <div className={`text-sm ${themeClasses.text.secondary}`}>
-                  Work
-                </div>
-                <div className={`text-xs ${themeClasses.text.muted}`}>
-                  February: 41h 45m • 14 tasks
-                </div>
-              </div>
-              <div className={`text-sm ${themeClasses.text.muted}`}>
-                <select
-                  className={`${themeClasses.input} p-1 rounded w-full sm:w-auto ${themeClasses.text.primary}`}
-                >
-                  <option>2024-02-20</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Weekly bars (Mon..Sun) - Responsive with horizontal scroll on mobile */}
-            <div className="flex gap-2 sm:gap-4 items-end mb-6 overflow-x-auto pb-2">
-              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d, i) => (
-                <div
-                  key={d}
-                  className="flex flex-col items-center gap-2 flex-shrink-0"
-                >
-                  <div
-                    className={`w-8 sm:w-12 lg:w-16 ${themeClasses.chart} rounded`}
-                    style={{ height: `${40 + i * 4}px` }}
-                  />
-                  <div className={`text-xs ${themeClasses.text.muted} mt-2`}>
-                    {d}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Per Day Work table */}
-            <div>
-              <h4
-                className={`text-md font-semibold mb-3 ${themeClasses.text.primary}`}
-              >
-                Per Day Work
-              </h4>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm min-w-full">
-                  <thead>
-                    <tr className={themeClasses.text.muted}>
-                      <th className="pb-2 pr-4">Task</th>
-                      <th className="pb-2 pr-4">Duration</th>
-                      <th className="pb-2">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      {
-                        task: "Write documentation",
-                        duration: "1h 0m",
-                        status: "Completed",
-                      },
-                      {
-                        task: "Fix bug #1250",
-                        duration: "2h 10m",
-                        status: "Completed",
-                      },
-                      {
-                        task: "Code refactoring",
-                        duration: "45m",
-                        status: "Completed",
-                      },
-                      {
-                        task: "Update dependencies",
-                        duration: "1h 30m",
-                        status: "In Progress",
-                      },
-                    ].map((r, idx) => (
-                      <tr
-                        key={idx}
-                        className={`border-t ${themeClasses.border}`}
-                      >
-                        <td className="py-3 pr-4">
-                          <div
-                            className={`truncate max-w-xs sm:max-w-none ${themeClasses.text.primary}`}
-                          >
-                            {r.task}
-                          </div>
-                        </td>
-                        <td
-                          className={`py-3 pr-4 whitespace-nowrap ${themeClasses.text.secondary}`}
-                        >
-                          {r.duration}
-                        </td>
-                        <td className="py-3">
-                          <span
-                            className={`px-2 sm:px-3 py-1 text-xs rounded-full whitespace-nowrap ${
-                              r.status === "Completed"
-                                ? "bg-green-700 text-white"
-                                : "bg-yellow-600 text-white"
-                            }`}
-                          >
-                            {r.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <PerDayWork userId={userId} />
           </div>
 
           {/* Bottom: Session Log */}
@@ -319,11 +215,10 @@ export default function PomodoroTimerPage({}) {
 
       {/* Bottom Navigation - Compact design */}
       <div
-        className={`fixed bottom-0 left-0 right-0 ${
-          isDarkMode
+        className={`fixed bottom-0 left-0 right-0 ${isDarkMode
             ? "bg-slate-800 border-slate-700"
             : "bg-white border-gray-200"
-        } border-t`}
+          } border-t`}
       >
         <div className="flex justify-center items-center py-2 px-4">
           <div className="flex space-x-12">
@@ -333,15 +228,14 @@ export default function PomodoroTimerPage({}) {
               className="flex flex-col items-center space-y-1 group"
             >
               <div
-                className={`p-2 rounded-full transition-all duration-200 ${
-                  activeTab === "focus"
+                className={`p-2 rounded-full transition-all duration-200 ${activeTab === "focus"
                     ? isDarkMode
                       ? "text-red-400 bg-red-900/20"
                       : "text-red-500 bg-red-50"
                     : isDarkMode
-                    ? "text-gray-400 hover:text-gray-300"
-                    : "text-gray-500 hover:text-gray-600"
-                }`}
+                      ? "text-gray-400 hover:text-gray-300"
+                      : "text-gray-500 hover:text-gray-600"
+                  }`}
               >
                 <svg
                   className="w-5 h-5"
@@ -352,15 +246,14 @@ export default function PomodoroTimerPage({}) {
                 </svg>
               </div>
               <span
-                className={`text-xs font-medium transition-all duration-200 ${
-                  activeTab === "focus"
+                className={`text-xs font-medium transition-all duration-200 ${activeTab === "focus"
                     ? isDarkMode
                       ? "text-red-400"
                       : "text-red-500"
                     : isDarkMode
-                    ? "text-gray-400"
-                    : "text-gray-500"
-                }`}
+                      ? "text-gray-400"
+                      : "text-gray-500"
+                  }`}
               >
                 Focus Sessions
               </span>
@@ -372,15 +265,14 @@ export default function PomodoroTimerPage({}) {
               className="flex flex-col items-center space-y-1 group hover:opacity-80 transition-all duration-200"
             >
               <div
-                className={`p-2 rounded-full transition-all duration-200 ${
-                  activeTab === "analytics"
+                className={`p-2 rounded-full transition-all duration-200 ${activeTab === "analytics"
                     ? isDarkMode
                       ? "text-red-400 bg-red-900/20"
                       : "text-red-500 bg-red-50"
                     : isDarkMode
-                    ? "text-gray-400 hover:text-gray-300"
-                    : "text-gray-500 hover:text-gray-600"
-                }`}
+                      ? "text-gray-400 hover:text-gray-300"
+                      : "text-gray-500 hover:text-gray-600"
+                  }`}
               >
                 <svg
                   className="w-5 h-5"
@@ -391,15 +283,14 @@ export default function PomodoroTimerPage({}) {
                 </svg>
               </div>
               <span
-                className={`text-xs font-medium transition-all duration-200 ${
-                  activeTab === "analytics"
+                className={`text-xs font-medium transition-all duration-200 ${activeTab === "analytics"
                     ? isDarkMode
                       ? "text-red-400"
                       : "text-red-500"
                     : isDarkMode
-                    ? "text-gray-400"
-                    : "text-gray-500"
-                }`}
+                      ? "text-gray-400"
+                      : "text-gray-500"
+                  }`}
               >
                 Analytics
               </span>
