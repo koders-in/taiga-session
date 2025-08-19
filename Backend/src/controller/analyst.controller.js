@@ -1,5 +1,5 @@
 import axios from "axios";
-import { format, subDays, isSameDay, parseISO } from 'date-fns';
+import { format, subDays, isSameDay, parseISO } from "date-fns";
 
 // Simple in-memory cache
 const cache = new Map();
@@ -7,22 +7,22 @@ const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
 // Helper: Format duration in seconds → HH:MM:SS
 function formatDuration(seconds) {
-  if (seconds === undefined || seconds === null) return '00:00:00';
+  if (seconds === undefined || seconds === null) return "00:00:00";
 
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = Math.floor(seconds % 60);
 
   return [
-    hours.toString().padStart(2, '0'),
-    minutes.toString().padStart(2, '0'),
-    secs.toString().padStart(2, '0')
-  ].join(':');
+    hours.toString().padStart(2, "0"),
+    minutes.toString().padStart(2, "0"),
+    secs.toString().padStart(2, "0"),
+  ].join(":");
 }
 
 // ✅ Normalize sessions
 function normalizeSessions(sessions) {
-  return (sessions || []).map(s => ({
+  return (sessions || []).map((s) => ({
     session_id: s.session_id,
     user_id: s.user_id,
     task_id: s.task_id,
@@ -32,20 +32,20 @@ function normalizeSessions(sessions) {
     duration_minutes: s.duration_minutes,
     status: s.status,
     created_at: s.CreatedAt,
-    updated_at: s.UpdatedAt
+    updated_at: s.UpdatedAt,
   }));
 }
 
 // ✅ Normalize tasks
 function normalizeTasks(tasks) {
-  return (tasks || []).map(t => ({
+  return (tasks || []).map((t) => ({
     task_id: t.task_id,
     task_name: t.task_name,
     status: t.status,
     project_id: t.project_id,
     start_time: t.start_time,
     created_at: t.CreatedAt,
-    updated_at: t.UpdatedAt
+    updated_at: t.UpdatedAt,
   }));
 }
 
@@ -58,11 +58,11 @@ export const getUserWorkData = async (req, res) => {
     const cacheKey = `user_${user_id}_data`;
 
     const cachedData = cache.get(cacheKey);
-    if (cachedData && (Date.now() - cachedData.timestamp) < CACHE_TTL) {
+    if (cachedData && Date.now() - cachedData.timestamp < CACHE_TTL) {
       return res.json({
         ...cachedData.data,
         cached: true,
-        timestamp: new Date(cachedData.timestamp).toISOString()
+        timestamp: new Date(cachedData.timestamp).toISOString(),
       });
     }
 
@@ -71,9 +71,9 @@ export const getUserWorkData = async (req, res) => {
     const tasksUrl = `http://localhost:8080/api/v2/tables/mf8kw73a809ravm/records?where=(user_id,eq,${user_id})&limit=1000`;
 
     const headers = {
-      'Content-Type': 'application/json',
-      'xc-token': 'QEHwKlBURkmRZ2oTTBgoNSLJg3Yn1bSXDXc3vPzY',
-      'xc-auth': 'QEHwKlBURkmRZ2oTTBgoNSLJg3Yn1bSXDXc3vPzY'
+      "Content-Type": "application/json",
+      "xc-token": "QEHwKlBURkmRZ2oTTBgoNSLJg3Yn1bSXDXc3vPzY",
+      "xc-auth": "QEHwKlBURkmRZ2oTTBgoNSLJg3Yn1bSXDXc3vPzY",
     };
 
     const [sessionsRes, tasksRes] = await Promise.all([
@@ -85,16 +85,16 @@ export const getUserWorkData = async (req, res) => {
     const tasks = normalizeTasks(tasksRes.data.list || []);
 
     // Build task map
-    const taskMap = new Map(tasks.map(t => [t.task_id, t]));
+    const taskMap = new Map(tasks.map((t) => [t.task_id, t]));
 
     // Merge sessions with task info
-    const mergedData = sessions.map(session => {
+    const mergedData = sessions.map((session) => {
       const taskInfo = taskMap.get(session.task_id) || {};
       return {
         ...session,
-        task_name: taskInfo.task_name || 'Unknown',
-        task_status: taskInfo.status || 'Unknown',
-        project_id: taskInfo.project_id || null
+        task_name: taskInfo.task_name || "Unknown",
+        task_status: taskInfo.status || "Unknown",
+        project_id: taskInfo.project_id || null,
       };
     });
 
@@ -107,28 +107,27 @@ export const getUserWorkData = async (req, res) => {
       meta: {
         totalSessions: sessions.length,
         totalTasks: tasks.length,
-        mergedCount: mergedData.length
-      }
+        mergedCount: mergedData.length,
+      },
     };
 
     // ✅ Store normalized data in cache
     cache.set(cacheKey, {
       data: { ...result, sessions, tasks },
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     res.json({
       ...result,
       cached: false,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    console.error('Error in getUserWorkData:', error);
+    console.error("Error in getUserWorkData:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch user work data',
-      error: error.message
+      message: "Failed to fetch user work data",
+      error: error.message,
     });
   }
 };
@@ -142,7 +141,7 @@ export const getDailyWork = async (req, res) => {
     if (!user_id || !date) {
       return res.status(400).json({
         success: false,
-        message: 'Both user_id and date are required'
+        message: "Both user_id and date are required",
       });
     }
 
@@ -150,21 +149,21 @@ export const getDailyWork = async (req, res) => {
     if (isNaN(targetDate.getTime())) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid date format. Use YYYY-MM-DD'
+        message: "Invalid date format. Use YYYY-MM-DD",
       });
     }
 
-    const formattedDate = format(targetDate, 'yyyy-MM-dd');
+    const formattedDate = format(targetDate, "yyyy-MM-dd");
     const cacheKeyUser = `user_${user_id}_data`;
 
     // Ensure user data is cached
     let userDataCache = cache.get(cacheKeyUser);
-    if (!userDataCache || (Date.now() - userDataCache.timestamp) >= CACHE_TTL) {
+    if (!userDataCache || Date.now() - userDataCache.timestamp >= CACHE_TTL) {
       // Trigger getUserWorkData internally to refresh cache
       const fakeReq = { body: { user_id } };
       const fakeRes = {
         json: (data) => data,
-        status: (code) => ({ json: (data) => ({ code, ...data }) })
+        status: (code) => ({ json: (data) => ({ code, ...data }) }),
       };
       await getUserWorkData(fakeReq, fakeRes);
       userDataCache = cache.get(cacheKeyUser);
@@ -172,21 +171,21 @@ export const getDailyWork = async (req, res) => {
 
     const sessions = userDataCache?.data?.sessions || [];
     const tasks = userDataCache?.data?.tasks || [];
-    const taskMap = new Map(tasks.map(t => [t.task_id, t]));
+    const taskMap = new Map(tasks.map((t) => [t.task_id, t]));
 
     // Aggregate per task
     const dailyStats = {};
-    sessions.forEach(session => {
+    sessions.forEach((session) => {
       if (!session.created_at) return;
 
       const sessionDate = new Date(session.created_at);
-      const sessionDateStr = format(sessionDate, 'yyyy-MM-dd');
+      const sessionDateStr = format(sessionDate, "yyyy-MM-dd");
 
       if (sessionDateStr === formattedDate) {
         const task = taskMap.get(session.task_id) || {
           task_name: `Task ${session.task_id}`,
-          status: 'unknown',
-          project_id: null
+          status: "unknown",
+          project_id: null,
         };
 
         const duration = (session.duration_minutes || 0) * 60;
@@ -198,7 +197,7 @@ export const getDailyWork = async (req, res) => {
             status: task.status,
             project_id: task.project_id,
             total_duration: 0,
-            session_count: 0
+            session_count: 0,
           };
         }
 
@@ -208,22 +207,23 @@ export const getDailyWork = async (req, res) => {
     });
 
     // Convert to array + format duration
-    const taskList = Object.values(dailyStats).map(task => ({
+    const taskList = Object.values(dailyStats).map((task) => ({
       ...task,
-      total_duration: formatDuration(task.total_duration)
+      total_duration: formatDuration(task.total_duration),
     }));
 
     // Sort by duration
     taskList.sort((a, b) => {
-      const toSeconds = t => {
-        const [h, m, s] = t.split(':').map(Number);
+      const toSeconds = (t) => {
+        const [h, m, s] = t.split(":").map(Number);
         return h * 3600 + m * 60 + s;
       };
       return toSeconds(b.total_duration) - toSeconds(a.total_duration);
     });
 
     const totalSeconds = Object.values(dailyStats).reduce(
-      (sum, task) => sum + task.total_duration, 0
+      (sum, task) => sum + task.total_duration,
+      0
     );
 
     res.json({
@@ -234,15 +234,14 @@ export const getDailyWork = async (req, res) => {
       total_duration: formatDuration(totalSeconds),
       tasks: taskList,
       cached: true,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    console.error('Error in getDailyWork:', error);
+    console.error("Error in getDailyWork:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch daily work data',
-      error: error.message
+      message: "Failed to fetch daily work data",
+      error: error.message,
     });
   }
 };
@@ -250,6 +249,7 @@ export const getDailyWork = async (req, res) => {
 // ==========================================================
 // Get week-wise work statistics for a specific date
 // ==========================================================
+
 export const getWeekWiseWork = async (req, res) => {
   try {
     const userId = req.user?.id || req.query.user_id || req.body?.user_id;
@@ -260,11 +260,16 @@ export const getWeekWiseWork = async (req, res) => {
     // ✅ Parse reference date (either user-provided or today)
     let referenceDate = inputDate ? new Date(inputDate) : new Date();
     if (isNaN(referenceDate.getTime())) {
-      return res.status(400).json({ error: "Invalid date format. Use YYYY-MM-DD" });
+      return res
+        .status(400)
+        .json({ error: "Invalid date format. Use YYYY-MM-DD" });
     }
 
     const cacheKeyUser = `user_${userId}_data`;
-    const cacheKeyWeek = `week_${userId}_${format(referenceDate, "yyyy-MM-dd")}`;
+    const cacheKeyWeek = `week_${userId}_${format(
+      referenceDate,
+      "yyyy-MM-dd"
+    )}`;
     const now = Date.now();
 
     // ✅ Return from week cache if fresh
@@ -277,11 +282,11 @@ export const getWeekWiseWork = async (req, res) => {
 
     // ✅ Ensure user work data cache is present
     let userDataCache = cache.get(cacheKeyUser);
-    if (!userDataCache || (now - userDataCache.timestamp) >= CACHE_TTL) {
+    if (!userDataCache || now - userDataCache.timestamp >= CACHE_TTL) {
       const fakeReq = { body: { user_id: userId } };
       const fakeRes = {
         json: (data) => data,
-        status: (code) => ({ json: (data) => ({ code, ...data }) })
+        status: (code) => ({ json: (data) => ({ code, ...data }) }),
       };
       await getUserWorkData(fakeReq, fakeRes);
       userDataCache = cache.get(cacheKeyUser);
@@ -311,18 +316,21 @@ export const getWeekWiseWork = async (req, res) => {
     }
 
     // ✅ Final response
-    const result = days.map(d => ({
+    const result = days.map((d) => ({
       date: format(d.date, "yyyy-MM-dd"),
       day: d.label,
       total_duration: formatDuration(d.totalSeconds),
-      total_seconds: d.totalSeconds
+      total_seconds: d.totalSeconds,
     }));
 
     // ✅ Save to cache
     cache.set(cacheKeyWeek, { timestamp: now, data: result });
 
-    res.json({ source: "fresh", reference_date: format(referenceDate, "yyyy-MM-dd"), data: result });
-
+    res.json({
+      source: "fresh",
+      reference_date: format(referenceDate, "yyyy-MM-dd"),
+      data: result,
+    });
   } catch (err) {
     console.error("Error in getWeekWiseWork:", err);
     res.status(500).json({ error: "Internal Server Error" });
@@ -338,7 +346,7 @@ export const getMonthlyWork = async (req, res) => {
     if (!user_id || !date) {
       return res.status(400).json({
         success: false,
-        message: 'Both user_id and date are required'
+        message: "Both user_id and date are required",
       });
     }
 
@@ -347,13 +355,13 @@ export const getMonthlyWork = async (req, res) => {
     if (isNaN(inputDate.getTime())) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid date format. Use YYYY-MM-DD'
+        message: "Invalid date format. Use YYYY-MM-DD",
       });
     }
 
     const year = inputDate.getFullYear();
     const month = inputDate.getMonth() + 1; // Months are 0-indexed in JS
-    const monthName = inputDate.toLocaleString('default', { month: 'long' });
+    const monthName = inputDate.toLocaleString("default", { month: "long" });
 
     const cacheKeyUser = `user_${user_id}_data`;
     const cacheKeyMonth = `month_${user_id}_${year}_${month}`;
@@ -366,19 +374,19 @@ export const getMonthlyWork = async (req, res) => {
         return res.json({
           ...data,
           cached: true,
-          timestamp: new Date(timestamp).toISOString()
+          timestamp: new Date(timestamp).toISOString(),
         });
       }
     }
 
     // Ensure user data is cached
     let userDataCache = cache.get(cacheKeyUser);
-    if (!userDataCache || (now - userDataCache.timestamp) >= CACHE_TTL) {
+    if (!userDataCache || now - userDataCache.timestamp >= CACHE_TTL) {
       // Trigger getUserWorkData internally to refresh cache
       const fakeReq = { body: { user_id } };
       const fakeRes = {
         json: (data) => data,
-        status: (code) => ({ json: (data) => ({ code, ...data }) })
+        status: (code) => ({ json: (data) => ({ code, ...data }) }),
       };
       await getUserWorkData(fakeReq, fakeRes);
       userDataCache = cache.get(cacheKeyUser);
@@ -394,7 +402,7 @@ export const getMonthlyWork = async (req, res) => {
     let totalSeconds = 0;
     let taskIds = new Set();
 
-    sessions.forEach(session => {
+    sessions.forEach((session) => {
       if (!session.start_time) return;
 
       const sessionDate = new Date(session.start_time);
@@ -415,32 +423,31 @@ export const getMonthlyWork = async (req, res) => {
       year,
       month,
       month_name: monthName,
-      date: format(inputDate, 'yyyy-MM-dd'),
+      date: format(inputDate, "yyyy-MM-dd"),
       total_duration: formatDuration(totalSeconds),
       total_seconds: totalSeconds,
       formatted_duration: `${hours}h ${minutes}m`,
       total_tasks: taskIds.size,
-      unique_tasks: Array.from(taskIds)
+      unique_tasks: Array.from(taskIds),
     };
 
     // Cache the monthly data
     cache.set(cacheKeyMonth, {
       data: result,
-      timestamp: now
+      timestamp: now,
     });
 
     res.json({
       ...result,
       cached: false,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    console.error('Error in getMonthlyWork:', error);
+    console.error("Error in getMonthlyWork:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch monthly work data',
-      error: error.message
+      message: "Failed to fetch monthly work data",
+      error: error.message,
     });
   }
 };

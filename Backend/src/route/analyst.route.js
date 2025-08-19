@@ -1,47 +1,48 @@
-import express from 'express';
+import express from "express";
 const router = express.Router();
 import { authenticate } from "../middleware/auth.js";
-import { getUserWorkData, 
-        getDailyWork,
-        getWeekWiseWork,
-        getMonthlyWork} from '../controller/analyst.controller.js';
-
+import {
+  getUserWorkData,
+  getDailyWork,
+  getWeekWiseWork,
+  getMonthlyWork,
+} from "../controller/analyst.controller.js";
 
 // Protect all routes with authentication
 router.use(authenticate);
 
 // Get user work data
-router.get('/user-work', getUserWorkData);   // endpoint not for frontend only to test 
+router.get("/user-work", getUserWorkData); // endpoint not for frontend only to test
 
 // Middleware to validate daily work request
 const validateDailyWorkRequest = (req, res, next) => {
-    const { user_id, date } = req.body;
-    
-    if (!user_id || !date) {
-        return res.status(400).json({
-            success: false,
-            message: 'Both user_id and date are required in the request body'
-        });
-    }
-    
-    // Validate date format (YYYY-MM-DD)
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Invalid date format. Please use YYYY-MM-DD format'
-        });
-    }
-    
-    next();
+  const { user_id, date } = req.body;
+
+  if (!user_id || !date) {
+    return res.status(400).json({
+      success: false,
+      message: "Both user_id and date are required in the request body",
+    });
+  }
+
+  // Validate date format (YYYY-MM-DD)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid date format. Please use YYYY-MM-DD format",
+    });
+  }
+
+  next();
 };
 
 // Daily work statistics
-router.get('/daily-work', validateDailyWorkRequest, getDailyWork);
+router.get("/daily-work", validateDailyWorkRequest, getDailyWork);
 
 // Week-wise work statistics
-router.get('/week-wise-work', validateDailyWorkRequest, getWeekWiseWork);
+router.get("/week-wise-work", validateDailyWorkRequest, getWeekWiseWork);
 
 // Monthly statistics
-router.get('/monthly-stats', validateDailyWorkRequest, getMonthlyWork);
+router.get("/monthly-stats", validateDailyWorkRequest, getMonthlyWork);
 
 export default router;
