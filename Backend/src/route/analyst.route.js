@@ -37,12 +37,12 @@ const validateDailyWorkRequest = (req, res, next) => {
 };
 
 // Daily work statistics
-router.get("/daily-work", validateDailyWorkRequest, getDailyWork);
+router.post("/daily-work", validateDailyWorkRequest, getDailyWork);
 
 // Week-wise work statistics
-router.get("/week-wise-work", validateDailyWorkRequest, getWeekWiseWork);
+router.post("/week-wise-work", validateDailyWorkRequest, getWeekWiseWork);
 
 // Monthly statistics
-router.get("/monthly-stats", validateDailyWorkRequest, getMonthlyWork);
+router.post("/monthly-stats", validateDailyWorkRequest, getMonthlyWork);
 
 export default router;
