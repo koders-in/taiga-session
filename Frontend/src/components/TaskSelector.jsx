@@ -82,15 +82,11 @@ export default function TaskSelector({
           setTasks([]);
           onTaskChange && onTaskChange(null);
         }}
-        className={`p-2 rounded w-[180px] ${themeStyles.dropdown}`}
+        className="p-2 rounded w-[180px] border border-orange-200 bg-white  text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400 shadow-sm"
       >
         <option value="">Select a project</option>
         {projects.map((p) => (
-          <option
-            key={p.id}
-            value={p.id}
-            className={themeStyles.dropdownOption}
-          >
+          <option key={p.id} value={p.id} className="bg-white text-gray-800">
             {p.name}
           </option>
         ))}
@@ -103,16 +99,12 @@ export default function TaskSelector({
           const t = tasks.find((x) => String(x.id) === e.target.value) || null;
           onTaskChange && onTaskChange(t);
         }}
-        className={`p-2 rounded w-[180px] ${themeStyles.dropdown}`}
+        className="p-2 rounded w-[180px] border border-orange-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400 shadow-sm"
         disabled={!selectedProject}
       >
         <option value="">Select a task</option>
         {tasks.map((t) => (
-          <option
-            key={t.id}
-            value={t.id}
-            className={themeStyles.dropdownOption}
-          >
+          <option key={t.id} value={t.id} className="bg-white text-gray-800">
             {t.subject}
           </option>
         ))}
@@ -122,19 +114,16 @@ export default function TaskSelector({
       <select
         value={selectedCategory || ""}
         onChange={(e) => onCategoryChange && onCategoryChange(e.target.value)}
-        className={`p-2 rounded w-[180px] ${themeStyles.dropdown}`}
+        className="p-2 rounded w-[180px] border border-orange-200 bg-white  text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400 shadow-sm"
       >
         <option value="">Select a category</option>
         {categories.map((c) => (
-          <option
-            key={c.id}
-            value={c.name}
-            className={themeStyles.dropdownOption}
-          >
+          <option key={c.id} value={c.name} className="bg-white text-gray-800">
             {c.name}
           </option>
         ))}
       </select>
     </div>
   );
+
 }
