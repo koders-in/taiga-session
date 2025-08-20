@@ -2,7 +2,6 @@ import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { sendDiscordMessage } from "../utils/discordWebhook.js";
 
-import { makeTaigaRequest } from "./taiga.controller.js";
 
 // In-memory storage for active sessions
 const activeSessions = new Map();
@@ -80,7 +79,7 @@ const updateSessionRecord = async (Id, updateData) => {
 export const startTimer = async (req, res) => {
   try {
     // Get task details from frontend
-    const { task_Id, task_Name, category, duration_minutes, name, project } =
+    const { task_Id, task_Name, category, name, project, note } =
       req.body;
 
     // Get user ID from the authenticated user
@@ -127,21 +126,23 @@ export const startTimer = async (req, res) => {
       taskRecordId = existingTaskRes.data.list[0].Id;
       await updateTaskStatus(task_Id, "Working");
     } else {
-      const taskResult = await createTaskRecord({
-        task_id: task_Id,
-        user_id: userId,
-        task_name: task_Name,
-        start_time: startTime,
-        Status: "Working",
-      });
-
-      if (!taskResult.success) {
+      try {
+        const taskResult = await createTaskRecord({
+          task_id: task_Id,
+          user_id: userId,
+          task_name: task_Name,
+          start_time: startTime,
+          Status: "Working",
+        });
+        taskRecordId = taskResult.data?.Id;
+      } catch (error) {
+        console.error("Error creating task record:", error);
         return res.status(500).json({
           success: false,
           message: "Failed to create task",
+          error: error.message
         });
       }
-      taskRecordId = taskResult.data?.Id;
     }
 
     // --- Create new session in DB ---
@@ -154,6 +155,7 @@ export const startTimer = async (req, res) => {
       duration_minutes: 0,
       status: "Started",
       interrupted: false,
+      notes:String(note || ""),
     });
 
     const sessionRecordId = sessionRes.data?.Id || null;
@@ -168,28 +170,13 @@ export const startTimer = async (req, res) => {
       status: "active",
       pauseStart: null,
       pauseDuration: 0,
-
+      notes :String(note || ""),
       lastResumeTime: new Date(),
       duration_minutes: 0,
       recordId: sessionRecordId, // 🔑 store DB record id
     });
 
-    // --- Fetch project name from Taiga if project ID is provided ---
-    let projectName = project || "Unknown Project"; // default
-
-    if (project) {
-      try {
-        const token = req.token; // user token from request
-        const projectData = await makeTaigaRequest(
-          token,
-          "get",
-          `/projects/${project}`
-        );
-        projectName = projectData?.name || "Unknown Project";
-      } catch (err) {
-        console.error("Failed to fetch project name from Taiga:", err.message);
-      }
-    }
+    let projectName = project || "Unknown Project";
 
     // webHook send msg on discord'
 
@@ -200,6 +187,7 @@ export const startTimer = async (req, res) => {
       startTime: startTime, // Can be Date or ISO string
       status: "active",
       project: projectName,
+      Note :note,
     });
 
     return res.status(201).json({
@@ -306,8 +294,8 @@ export const resumeTimer = async (req, res) => {
 // Complete timer
 export const completeTimer = async (req, res) => {
   try {
-    // Default auto = false if not provided
-    const { auto = false } = req.body || {};
+
+    const { auto, note } = req.body;
 
     const { sessionId } = req.params;
     const { full_name, id } = req.user;
@@ -334,11 +322,12 @@ export const completeTimer = async (req, res) => {
 
     await updateSessionRecord(session.recordId, {
       status: "Completed",
+      notes:`${session.notes || ''}\n${note || ''}`.trim(),
       end_time: now.toISOString(),
       duration_minutes: totalMinutes.toFixed(2),
     });
 
-    if (!auto) {
+    if (auto =="False") {
       await updateTaskStatus(session.taskId, "Completed");
     }
 
@@ -348,6 +337,7 @@ export const completeTimer = async (req, res) => {
       sessionId: sessionId,
       startTime: Date.now(),
       status: "completed",
+      Note :String(note || ""),
     });
 
     return res.json({
@@ -368,6 +358,7 @@ export const completeTimer = async (req, res) => {
 // Reset timer
 export const resetTimer = async (req, res) => {
   try {
+    const {note}=req.body ||""; 
     const { sessionId } = req.params;
     const { full_name, id } = req.user;
 
@@ -384,6 +375,7 @@ export const resetTimer = async (req, res) => {
     await updateSessionRecord(session.recordId, {
       status: "Cancelled",
       end_time: new Date().toISOString(),
+      notes: `${session.notes || ''}\n${note || ''}`.trim(),
       duration_minutes: session.duration_minutes.toFixed(2),
       interrupted: "True",
     });
@@ -393,7 +385,8 @@ export const resetTimer = async (req, res) => {
       sessionId: sessionId,
       startTime: Date.now(), // Can be Date or ISO string, desc: Reset time
       status: "reset",
-    });
+      Note :String(note || ""),
+      });
 
     res.json({ success: true, message: "Session reset successfully" });
   } catch (err) {
@@ -428,7 +421,7 @@ export const breakTImer = async (req, res) => {
   }
 };
 
-export const endBreakTimer = async (req, res) => {
+export const endBreakTimer = async (req, res) => { 
   try {
     const { full_name, id } = req.user;
 
