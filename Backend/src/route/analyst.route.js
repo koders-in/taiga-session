@@ -12,7 +12,7 @@ import {
 router.use(authenticate);
 
 // Get user work data
-router.get("/user-work", getUserWorkData); // endpoint not for frontend only to test
+router.post("/user-work", getUserWorkData); // endpoint not for frontend only to test
 
 // Middleware to validate daily work request
 const validateDailyWorkRequest = (req, res, next) => {

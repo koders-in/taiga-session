@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  getDailyWork,
-  getMonthlyStats,
-  getWeekWiseWork,
-} from "../api/analyst";
+import { getDailyWork, getMonthlyStats, getWeekWiseWork } from "../api/analyst";
 
 export default function PerDayWork({ userId }) {
   const [daily, setDaily] = useState(null);
@@ -44,10 +40,11 @@ export default function PerDayWork({ userId }) {
 
       {/* Card Container */}
       <div className="rounded-2xl bg-white shadow-lg border border-orange-200 overflow-hidden">
-
         {/* Daily Work Section */}
         <div className="p-6">
-          <h2 className="text-lg font-semibold mb-4 text-orange-700">Day Wise Work</h2>
+          <h2 className="text-lg font-semibold mb-4 text-orange-700">
+            Day Wise Work
+          </h2>
           {daily?.tasks?.length > 0 ? (
             <table className="w-full text-left border-collapse">
               <thead>
@@ -64,13 +61,16 @@ export default function PerDayWork({ userId }) {
                     className="border-b border-orange-100 hover:bg-orange-100 transition"
                   >
                     <td className="py-3">{task.task_name}</td>
-                    <td className="py-3 text-gray-700">{task.total_duration}</td>
+                    <td className="py-3 text-gray-700">
+                      {task.total_duration}
+                    </td>
                     <td className="py-3">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${task.status === "Completed"
-                          ? "bg-green-500 text-white"
-                          : "bg-yellow-400 text-black"
-                          }`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          task.status === "Completed"
+                            ? "bg-green-500 text-white"
+                            : "bg-yellow-400 text-black"
+                        }`}
                       >
                         {task.status}
                       </span>
@@ -89,14 +89,19 @@ export default function PerDayWork({ userId }) {
 
         {/* Weekly Work Section */}
         <div className="p-6">
-          <h2 className="text-lg font-semibold mb-4 text-orange-700">Weekly Work</h2>
+          <h2 className="text-lg font-semibold mb-4 text-orange-700">
+            Weekly Work
+          </h2>
           <div className="flex items-end justify-between h-44">
             {weekly.map((day) => (
               <div key={day.date} className="flex flex-col items-center w-12">
                 <div
                   className="w-8 bg-orange-400 rounded-md shadow-md transition-all duration-300"
                   style={{
-                    height: `${Math.min(150, (day.total_seconds / 3600) * 20)}px`,
+                    height: `${Math.min(
+                      150,
+                      (day.total_seconds / 3600) * 20
+                    )}px`,
                   }}
                 ></div>
                 <span className="text-xs mt-2 text-gray-600">{day.day}</span>
@@ -110,7 +115,9 @@ export default function PerDayWork({ userId }) {
 
         {/* Monthly Stats Section */}
         <div className="p-6">
-          <h2 className="text-lg font-semibold mb-4 text-orange-700">Monthly Work</h2>
+          <h2 className="text-lg font-semibold mb-4 text-orange-700">
+            Monthly Work
+          </h2>
           {monthly ? (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-gray-700">
               <div className="bg-orange-100 rounded-xl p-4 text-center shadow">

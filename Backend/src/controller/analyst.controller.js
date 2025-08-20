@@ -55,6 +55,11 @@ function normalizeTasks(tasks) {
 export const getUserWorkData = async (req, res) => {
   try {
     const { user_id } = req.body;
+    if (!user_id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "user_id required" });
+    }
     const cacheKey = `user_${user_id}_data`;
 
     const cachedData = cache.get(cacheKey);
