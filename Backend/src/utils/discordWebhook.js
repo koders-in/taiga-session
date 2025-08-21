@@ -87,6 +87,11 @@ export async function sendDiscordMessage(content, embedData = null) {
               value: embedData.status,
               inline: true,
             },
+            embedData.Note && {
+              name: "📝 Note",
+              value: embedData.Note,
+              inline: false,
+            },
           ].filter(Boolean),
 
           timestamp: new Date(),
