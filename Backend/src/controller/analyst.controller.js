@@ -456,3 +456,51 @@ export const getMonthlyWork = async (req, res) => {
     });
   }
 };
+
+// ==========================================================
+// Get all sessions for a specific user
+// ==========================================================
+export const getSessionsofUser = async (req, res) => {
+  try {
+    // Reuse the existing getUserWorkData function
+    const { user_id } = req.body;
+    
+    if (!user_id) {
+      return res.status(400).json({
+        success: false,
+        message: "user_id is required in the request body"
+      });
+    }
+
+    // Call getUserWorkData and then extract just the sessions
+    const workData = await getUserWorkData(req, {
+      json: (data) => {
+        if (data.success) {
+          // Return only the sessions data
+          res.json({
+            success: true,
+            sessions: data.data, // data.data contains the merged sessions array
+            total: data.data?.length || 0
+          });
+        } else {
+          res.status(500).json({
+            success: false,
+            message: data.message || "Failed to fetch user sessions",
+            error: data.error
+          });
+        }
+      },
+      status: (code) => ({
+        json: (data) => res.status(code).json(data)
+      })
+    });
+
+  } catch (error) {
+    console.error("Error in getSessionsofUser:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch user sessions",
+      error: error.message,
+    });
+  }
+};
