@@ -6,6 +6,7 @@ import {
   getDailyWork,
   getWeekWiseWork,
   getMonthlyWork,
+  getSessionsofUser,
 } from "../controller/analyst.controller.js";
 
 // Protect all routes with authentication
@@ -44,5 +45,8 @@ router.post("/week-wise-work", validateDailyWorkRequest, getWeekWiseWork);
 
 // Monthly statistics
 router.post("/monthly-stats", validateDailyWorkRequest, getMonthlyWork);
+
+// Get all sessions for a user
+router.post("/sessions", getSessionsofUser);
 
 export default router;

@@ -1,9 +1,14 @@
 import axios from "axios";
 import { format, subDays, isSameDay, parseISO } from "date-fns";
 
+const API_BASE_URL = process.env.nocodb_url;
+const API_TOKEN = process.env.nocodb_token;
+const TASKS_TABLE_ID = process.env.nocodb_table_tasks;
+const POMODORO_TABLE_ID = process.env.nocodb_table_pomodoro_sessions;
+
 // Simple in-memory cache
 const cache = new Map();
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 // Helper: Format duration in seconds → HH:MM:SS
 function formatDuration(seconds) {
@@ -31,6 +36,7 @@ function normalizeSessions(sessions) {
     end_time: s.end_time,
     duration_minutes: s.duration_minutes,
     status: s.status,
+    notes: s.notes,
     created_at: s.CreatedAt,
     updated_at: s.UpdatedAt,
   }));
@@ -72,13 +78,12 @@ export const getUserWorkData = async (req, res) => {
     }
 
     // API endpoints
-    const sessionsUrl = `http://localhost:8080/api/v2/tables/maea6o4q9t7ybeu/records?where=(user_id,eq,${user_id})&limit=1000`;
-    const tasksUrl = `http://localhost:8080/api/v2/tables/mf8kw73a809ravm/records?where=(user_id,eq,${user_id})&limit=1000`;
+    const sessionsUrl = `${API_BASE_URL}/api/v2/tables/${POMODORO_TABLE_ID}/records?where=(user_id,eq,${user_id})&limit=1000`;
+    const tasksUrl = `${API_BASE_URL}/api/v2/tables/${TASKS_TABLE_ID}/records?where=(user_id,eq,${user_id})&limit=1000`;
 
     const headers = {
       "Content-Type": "application/json",
-      "xc-token": "QEHwKlBURkmRZ2oTTBgoNSLJg3Yn1bSXDXc3vPzY",
-      "xc-auth": "QEHwKlBURkmRZ2oTTBgoNSLJg3Yn1bSXDXc3vPzY",
+      "xc-token": API_TOKEN,
     };
 
     const [sessionsRes, tasksRes] = await Promise.all([
@@ -452,6 +457,54 @@ export const getMonthlyWork = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to fetch monthly work data",
+      error: error.message,
+    });
+  }
+};
+
+// ==========================================================
+// Get all sessions for a specific user
+// ==========================================================
+export const getSessionsofUser = async (req, res) => {
+  try {
+    // Reuse the existing getUserWorkData function
+    const { user_id } = req.body;
+    
+    if (!user_id) {
+      return res.status(400).json({
+        success: false,
+        message: "user_id is required in the request body"
+      });
+    }
+
+    // Call getUserWorkData and then extract just the sessions
+    const workData = await getUserWorkData(req, {
+      json: (data) => {
+        if (data.success) {
+          // Return only the sessions data
+          res.json({
+            success: true,
+            sessions: data.data, // data.data contains the merged sessions array
+            total: data.data?.length || 0
+          });
+        } else {
+          res.status(500).json({
+            success: false,
+            message: data.message || "Failed to fetch user sessions",
+            error: data.error
+          });
+        }
+      },
+      status: (code) => ({
+        json: (data) => res.status(code).json(data)
+      })
+    });
+
+  } catch (error) {
+    console.error("Error in getSessionsofUser:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch user sessions",
       error: error.message,
     });
   }
