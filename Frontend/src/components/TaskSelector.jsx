@@ -12,17 +12,37 @@ export default function TaskSelector({
 }) {
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
+  // const categories = [
+  //   { id: 1, name: "Planning & Requirements" },
+  //   { id: 2, name: "Design & Prototyping" },
+  //   { id: 3, name: "Frontend Development" },
+  //   { id: 4, name: "Backend Development" },
+  //   { id: 5, name: "DevOps & Deployment" },
+  //   { id: 6, name: "Testing & QA" },
+  //   { id: 7, name: "Documentation & Knowledge Baset" },
+  //   { id: 8, name: "Stakeholder/Client/Team Communicationt" },
+  //   { id: 9, name: "HR & Administration" },
+  //   { id: 10, name: "Support & Maintenance" },
+  // ];
   const categories = [
-    { id: 1, name: "Planning & Requirements" },
-    { id: 2, name: "Design & Prototyping" },
-    { id: 3, name: "Frontend Development" },
-    { id: 4, name: "Backend Development" },
+    { id: 1, name: "Backend Development" },
+    { id: 2, name: "Bug Fixing" },
+    { id: 3, name: "Code Review" },
+    { id: 4, name: "Design & Prototyping" },
     { id: 5, name: "DevOps & Deployment" },
-    { id: 6, name: "Testing & QA" },
-    { id: 7, name: "Documentation & Knowledge Baset" },
-    { id: 8, name: "Stakeholder/Client/Team Communicationt" },
-    { id: 9, name: "HR & Administration" },
-    { id: 10, name: "Support & Maintenance" },
+    { id: 6, name: "Documentation & Knowledge Base" },
+    { id: 7, name: "Frontend Development" },
+    { id: 8, name: "Integration" },
+    { id: 9, name: "Performance Optimization" },
+    { id: 10, name: "Planning & Requirements" },
+    { id: 11, name: "Refactoring" },
+    { id: 12, name: "Research (Technical)" },
+    { id: 13, name: "Security & Compliance" },
+    { id: 14, name: "Stakeholder/Team Communication" },
+    { id: 15, name: "Support & Maintenance" },
+    { id: 16, name: "Testing & QA" },
+    { id: 17, name: "UI/UX Improvements" },
+    { id: 18, name: "Other" },
   ];
 
   // Fetch projects

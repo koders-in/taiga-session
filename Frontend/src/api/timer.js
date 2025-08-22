@@ -104,12 +104,12 @@ export async function resetTimer(sessionId, note) {
 }
 
 
-export async function completeTimer(sessionId, note) {
+export async function completeTimer(sessionId, note, auto) {
   const token = getToken();
   if (!token || !sessionId) {
     return { success: false, message: "Missing token or sessionId" };
   }
-  const payload = { note: note || "" };
+  const payload = { note: note || "", auto: auto || true };
 
   try {
     const res = await fetch(`${API_BASE}/complete/${sessionId}`, {

@@ -243,10 +243,10 @@ export default function PomodoroTimer({
   };
 
 
-  const handleComplete = async () => {
+  const handleComplete = async (auto="True") => {
     try {
       if (sessionId) {
-        const res = await completeTimer(sessionId, noteText);
+        const res = await completeTimer(sessionId, noteText,auto);
         if (res?.success && noteText.trim()) {
           onAddNote(sessionId, noteText);
           setNoteText("");
@@ -471,7 +471,7 @@ export default function PomodoroTimer({
 
             <button
               className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-xl font-medium transition-colors"
-              onClick={handleComplete}
+              onClick={handleComplete("False")}
               disabled={!running && secondsLeft === WORK_DEFAULT}
             >
               Complete
