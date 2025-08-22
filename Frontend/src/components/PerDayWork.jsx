@@ -38,20 +38,20 @@ export default function PerDayWork({ userId }) {
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="bg-orange-50 text-gray-800 px-3 py-2 rounded-lg border border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
+          className="bg-white text-gray-800 px-3 py-2 rounded-lg border border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
         />
       </div>
 
       {/* Card Container */}
-      <div className="rounded-2xl bg-white shadow-lg border border-orange-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-lg p-6 w-full">
 
         {/* Daily Work Section */}
         <div className="p-6">
-          <h2 className="text-lg font-semibold mb-4 text-orange-700">Day Wise Work</h2>
+          <h2 className="text-lg font-semibold mb-4 text-gray-600 ">Day</h2>
           {daily?.tasks?.length > 0 ? (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-orange-200">
+                <tr className="border-b border-orange-300">
                   <th className="pb-3 text-orange-600 font-medium">Task</th>
                   <th className="pb-3 text-orange-600 font-medium">Duration</th>
                   <th className="pb-3 text-orange-600 font-medium">Status</th>
@@ -61,7 +61,7 @@ export default function PerDayWork({ userId }) {
                 {daily.tasks.map((task) => (
                   <tr
                     key={task.task_id}
-                    className="border-b border-orange-100 hover:bg-orange-100 transition"
+                    className=" hover:bg-orange-100 transition"
                   >
                     <td className="py-3">{task.task_name}</td>
                     <td className="py-3 text-gray-700">{task.total_duration}</td>
@@ -69,7 +69,7 @@ export default function PerDayWork({ userId }) {
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium ${task.status === "Completed"
                           ? "bg-green-500 text-white"
-                          : "bg-yellow-400 text-black"
+                          : " bg-blue-500  text-white"
                           }`}
                       >
                         {task.status}
@@ -85,16 +85,16 @@ export default function PerDayWork({ userId }) {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-orange-200" />
+        <div className="border-t border-orange-300" />
 
         {/* Weekly Work Section */}
         <div className="p-6">
-          <h2 className="text-lg font-semibold mb-4 text-orange-700">Weekly Work</h2>
+          <h2 className="text-lg font-semibold mb-4 text-gray-600 ">Week</h2>
           <div className="flex items-end justify-between h-44">
             {weekly.map((day) => (
               <div key={day.date} className="flex flex-col items-center w-12">
                 <div
-                  className="w-8 bg-orange-400 rounded-md shadow-md transition-all duration-300"
+                  className="w-8 bg-blue-500 rounded-md shadow-md transition-all duration-300"
                   style={{
                     height: `${Math.min(150, (day.total_seconds / 3600) * 20)}px`,
                   }}
@@ -106,11 +106,11 @@ export default function PerDayWork({ userId }) {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-orange-200" />
+        <div className="border-t border-orange-300" />
 
         {/* Monthly Stats Section */}
         <div className="p-6">
-          <h2 className="text-lg font-semibold mb-4 text-orange-700">Monthly Work</h2>
+          <h2 className="text-lg font-semibold mb-4 text-gray-600 ">Month</h2>
           {monthly ? (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-gray-700">
               <div className="bg-orange-100 rounded-xl p-4 text-center shadow">

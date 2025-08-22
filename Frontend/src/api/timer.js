@@ -2,20 +2,20 @@ import { getToken } from "./login";
 
 const API_BASE = "http://localhost:4000/api/timer";
 
-export async function startTimer(taskId, taskName, category, name, project) {
+export async function startTimer(taskId, taskName, category, name, project, note) {
   const token = getToken();
 
   if (!token || !taskId || !taskName || !category) {
     return { success: false, message: "Missing token, taskId, or taskName" };
   }
 
-  // build backend-compatible payload
   const payload = {
-    task_Id: taskId,    
-    task_Name: taskName, 
+    task_Id: taskId,
+    task_Name: taskName,
     category: category,
     name: name,
-    project: project
+    project: project,
+    note: note || ""
   };
 
   console.log(" Sending Start Timer Payload:", payload);
@@ -80,18 +80,21 @@ export async function resumeTimer(sessionId) {
   }
 }
 
-export async function resetTimer(sessionId) {
+export async function resetTimer(sessionId, note) {
   const token = getToken();
   if (!token || !sessionId) {
     return { success: false, message: "Missing token or sessionId" };
   }
+  const payload = { note: note || "" };
 
   try {
     const res = await fetch(`${API_BASE}/reset/${sessionId}`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify(payload),
     });
     return await res.json();
   } catch (error) {
@@ -101,18 +104,21 @@ export async function resetTimer(sessionId) {
 }
 
 
-export async function completeTimer(sessionId) {
+export async function completeTimer(sessionId, note) {
   const token = getToken();
   if (!token || !sessionId) {
     return { success: false, message: "Missing token or sessionId" };
   }
+  const payload = { note: note || "" };
 
   try {
     const res = await fetch(`${API_BASE}/complete/${sessionId}`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify(payload),
     });
     return await res.json();
   } catch (error) {

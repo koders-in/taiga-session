@@ -14,9 +14,13 @@ export default function PomodoroTimer({
   taskName,
   category,
   onSessionComplete,
-
   name,
   project,
+  parentSessionId,
+  setParentSessionId,
+  noteText,
+  setNoteText,
+  onAddNote,
 }) {
 
 
@@ -24,6 +28,7 @@ export default function PomodoroTimer({
   const WORK_DEFAULT = 25 * 60;
   const SHORT_BREAK = 5 * 60;
   const LONG_BREAK = 15 * 60;
+
   const [secondsLeft, setSecondsLeft] = useState(WORK_DEFAULT);
   const [running, setRunning] = useState(false);
   const [sessionId, setSessionId] = useState(null);
@@ -34,8 +39,8 @@ export default function PomodoroTimer({
   const [breakCount, setBreakCount] = useState(0);
 
 
-  useEffect(() => {
 
+  useEffect(() => {
     let interval;
     if (running && secondsLeft > 0) {
       interval = setInterval(() => {
@@ -43,6 +48,7 @@ export default function PomodoroTimer({
       }, 1000);
     } else if (secondsLeft === 0 && running) {
       setRunning(false);
+
       if (isBreak) {
         //  Break ended Start new Work session
         try {
@@ -66,6 +72,7 @@ export default function PomodoroTimer({
           setSecondsLeft(SHORT_BREAK);
           setBreakCount((prev) => prev + 1);
         }
+
         setIsBreak(true);
         setRunning(true);
         //  Break started send API
@@ -80,9 +87,12 @@ export default function PomodoroTimer({
     return () => clearInterval(interval);
   }, [running, secondsLeft, isBreak, breakCount, onSessionComplete, sessionId]);
 
-  // context 
-  let audioCtx;
+  // helper to format time
+  const formatTime = (date) =>
+    date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
+  // audio
+  let audioCtx;
   const initAudio = () => {
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -95,7 +105,6 @@ export default function PomodoroTimer({
   const playDing = () => {
     try {
       initAudio();
-
       const makeTone = (freq, vol, dur) => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -108,8 +117,8 @@ export default function PomodoroTimer({
         osc.stop(audioCtx.currentTime + dur);
       };
 
-      makeTone(880, 0.15, 1.5);  // fundamental
-      makeTone(1320, 0.07, 1.2); // overtone
+      makeTone(880, 0.15, 1.5);
+      makeTone(1320, 0.07, 1.2);
 
     } catch (e) {
       console.error("Soft ding failed:", e);
@@ -131,6 +140,7 @@ export default function PomodoroTimer({
         category: category,
         name: task.username,
         project: project,
+        note: noteText,
       };
       console.log(" [Frontend] Start Timer Payload:", resOnj);
       console.log(resOnj);
@@ -139,7 +149,8 @@ export default function PomodoroTimer({
         task.name || task.subject,
         category,
         task.username,
-        project
+        project,
+        noteText
       );
 
       console.log("[Frontend] Raw StartTimer Response:", res);
@@ -155,10 +166,17 @@ export default function PomodoroTimer({
       if (res?.success && sid) {
         console.log(" [Frontend] Timer started successfully!");
         setSessionId(sid);
+        setParentSessionId(sid);
         setRunning(true);
         setIsPaused(false);
         setSecondsLeft(WORK_DEFAULT);
         playDing();
+        //  save note when starting session
+        if (noteText.trim()) {
+          onAddNote(sid, noteText);
+          setNoteText("");
+        }
+
       } else {
         console.error(" [Frontend] Start timer failed:", res);
       }
@@ -201,15 +219,21 @@ export default function PomodoroTimer({
     }
   };
 
+
   const reset = async () => {
     if (!sessionId) return;
     try {
-      const res = await resetTimer(sessionId);
+      const res = await resetTimer(sessionId, noteText);
       if (res?.success) {
+        if (noteText.trim()) {
+          onAddNote(sessionId, noteText);
+          setNoteText("");
+        }
         setRunning(false);
         setIsPaused(false);
         setSecondsLeft(WORK_DEFAULT);
         setSessionId(null);
+        setParentSessionId(null);
       } else {
         console.error("Reset timer failed:", res);
       }
@@ -218,12 +242,14 @@ export default function PomodoroTimer({
     }
   };
 
+
   const handleComplete = async () => {
     try {
       if (sessionId) {
-        const res = await completeTimer(sessionId);
-        if (!res?.success) {
-          console.error("Complete timer failed:", res);
+        const res = await completeTimer(sessionId, noteText);
+        if (res?.success && noteText.trim()) {
+          onAddNote(sessionId, noteText);
+          setNoteText("");
         }
       }
     } catch (err) {
@@ -232,6 +258,7 @@ export default function PomodoroTimer({
       setRunning(false);
       setIsPaused(false);
       setSessionId(null);
+      setParentSessionId(null);
       playDing();
 
       if (isBreak) {
@@ -246,13 +273,14 @@ export default function PomodoroTimer({
       } else {
         if (onSessionComplete) onSessionComplete();
 
-        if (breakCount === 2) {
+        if (breakCount === 3) {
           setSecondsLeft(LONG_BREAK);
           setBreakCount(0);
         } else {
           setSecondsLeft(SHORT_BREAK);
           setBreakCount((prev) => prev + 1);
         }
+
         setIsBreak(true);
         setRunning(true);
         //  Break started send API
@@ -278,6 +306,8 @@ export default function PomodoroTimer({
     : WORK_DEFAULT;
 
   const progress = ((currentDuration - secondsLeft) / currentDuration) * 100;
+
+
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-sm mx-auto">
@@ -352,7 +382,7 @@ export default function PomodoroTimer({
             cy="50"
             r="40"
             fill="none"
-            stroke="rgb(251, 146, 60)" // orange-500
+            stroke="rgb(251, 146, 60)"
             strokeWidth="6"
             strokeLinecap="round"
             strokeDasharray={`${2 * Math.PI * 40}`}
@@ -379,7 +409,7 @@ export default function PomodoroTimer({
           </div>
         </div>
 
-        {/* Orange hand */}
+        {/* Hand */}
         <div
           className="absolute top-1/2 left-1/2 w-0.5 bg-orange-500 origin-bottom transition-transform duration-1000 rounded-full"
           style={{
@@ -394,6 +424,13 @@ export default function PomodoroTimer({
         <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-orange-500 rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
       </div>
 
+      {/* Start-End times */}
+      {running && (
+        <div className="text-center text-sm text-gray-600 mb-4">
+          {formatTime(new Date())} –{" "}
+          {formatTime(new Date(Date.now() + secondsLeft * 1000))}
+        </div>
+      )}
 
       {/* Main Action Button */}
       {!isBreak && (
@@ -404,7 +441,6 @@ export default function PomodoroTimer({
               setShowPopup(true);
               return;
             }
-
             if (running) {
               pause();
             } else if (isPaused) {
@@ -415,11 +451,7 @@ export default function PomodoroTimer({
           }}
           disabled={loading}
         >
-          {running
-            ? "Pause Session"
-            : isPaused
-              ? "Resume Session"
-              : "Start Session"}
+          {running ? "Pause Session" : isPaused ? "Resume Session" : "Start Session"}
         </button>
       )}
 
@@ -489,7 +521,4 @@ export default function PomodoroTimer({
       )}
     </div>
   );
-
-
-
 }

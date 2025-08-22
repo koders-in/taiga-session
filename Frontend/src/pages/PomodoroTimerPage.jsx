@@ -6,6 +6,7 @@ import PerDayWork from "../components/PerDayWork";
 import SessionLog from "../components/SessionLog";
 import { logout } from "../api/login";
 import { Timer, List } from "lucide-react";
+import NotesPanel from "../components/NotesPanel";
 
 export default function PomodoroTimerPage({ }) {
   const [userEmail, setUserEmail] = useState("");
@@ -14,6 +15,9 @@ export default function PomodoroTimerPage({ }) {
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [name, setName] = useState("");
+  const [parentSessionId, setParentSessionId] = useState(null);
+  const [notes, setNotes] = useState([]);
+  const [noteText, setNoteText] = useState("");
   // Track active tab
   const [userId, setUserId] = useState(null);
   const userID = localStorage.getItem("userId");
@@ -42,6 +46,16 @@ export default function PomodoroTimerPage({ }) {
     logout();
   };
 
+  //  note handler 
+  const handleAddNote = (sessionId, text) => {
+    if (!sessionId) {
+      alert("Start a session first!");
+      return;
+    }
+    const newNote = { sessionId, text, createdAt: new Date() };
+    setNotes((prev) => [newNote, ...prev]);
+
+  };
 
   return (
     <div className="bg-white min-h-screen text-gray-900 flex flex-col">
@@ -77,8 +91,8 @@ export default function PomodoroTimerPage({ }) {
           >
             <div
               className={`p-2 rounded-full transition-all duration-200 ${activeTab === "timer"
-                  ? "text-orange-500 bg-orange-100"
-                  : "text-gray-500 hover:text-gray-700"
+                ? "text-orange-500 bg-orange-100"
+                : "text-gray-500 hover:text-gray-700"
                 }`}
             >
               <Timer className="w-5 h-5" />
@@ -98,8 +112,8 @@ export default function PomodoroTimerPage({ }) {
           >
             <div
               className={`p-2 rounded-full transition-all duration-200 ${activeTab === "sessions"
-                  ? "text-orange-500 bg-orange-100"
-                  : "text-gray-500 hover:text-gray-700"
+                ? "text-orange-500 bg-orange-100"
+                : "text-gray-500 hover:text-gray-700"
                 }`}
             >
               <List className="w-5 h-5" />
@@ -129,16 +143,35 @@ export default function PomodoroTimerPage({ }) {
                 />
               </div>
 
-              {/* Timer */}
-              <div className="w-full max-w-md flex justify-center">
-                <PomodoroTimer
-                  project={selectedProject}
-                  taskId={selectedTask?.id}
-                  taskName={selectedTask?.subject}
-                  category={selectedCategory}
-                  name={name}
-                  onSessionComplete={() => { }}
-                />
+              {/* Timer + Notes  */}
+              <div className="w-full max-w-5xl flex flex-row gap-6 justify-center">
+                {/* Timer */}
+                <div className="flex-1 max-w-md">
+                  <PomodoroTimer
+                    project={selectedProject}
+                    taskId={selectedTask?.id}
+                    taskName={selectedTask?.subject}
+                    category={selectedCategory}
+                    name={name}
+                    onSessionComplete={() => { }}
+                    parentSessionId={parentSessionId}
+                    setParentSessionId={setParentSessionId}
+                    noteText={noteText}
+                    setNoteText={setNoteText}
+                    onAddNote={handleAddNote}
+                  />
+                </div>
+
+                {/* Notes */}
+                <div className="flex-1 max-w-md">
+                  <NotesPanel
+                    sessionId={parentSessionId}
+                    notes={notes}
+                    onAddNote={handleAddNote}
+                    noteText={noteText}
+                    setNoteText={setNoteText}
+                  />
+                </div>
               </div>
             </main>
           )}
