@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  getDailyWork,
-  getMonthlyStats,
-  getWeekWiseWork,
-} from "../api/analyst";
+import { getDailyWork, getMonthlyStats, getWeekWiseWork } from "../api/analyst";
 
 export default function PerDayWork({ userId }) {
   const [daily, setDaily] = useState(null);
@@ -64,7 +60,9 @@ export default function PerDayWork({ userId }) {
                     className=" hover:bg-orange-100 transition"
                   >
                     <td className="py-3">{task.task_name}</td>
-                    <td className="py-3 text-gray-700">{task.total_duration}</td>
+                    <td className="py-3 text-gray-700">
+                      {task.total_duration}
+                    </td>
                     <td className="py-3">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium ${task.status === "Completed"
@@ -96,7 +94,10 @@ export default function PerDayWork({ userId }) {
                 <div
                   className="w-8 bg-blue-500 rounded-md shadow-md transition-all duration-300"
                   style={{
-                    height: `${Math.min(150, (day.total_seconds / 3600) * 20)}px`,
+                    height: `${Math.min(
+                      150,
+                      (day.total_seconds / 3600) * 20
+                    )}px`,
                   }}
                 ></div>
                 <span className="text-xs mt-2 text-gray-600">{day.day}</span>

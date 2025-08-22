@@ -8,7 +8,7 @@ import { logout } from "../api/login";
 import { Timer, List } from "lucide-react";
 import NotesPanel from "../components/NotesPanel";
 
-export default function PomodoroTimerPage({ }) {
+export default function PomodoroTimerPage({}) {
   const [userEmail, setUserEmail] = useState("");
   const [userPhoto, setUserPhoto] = useState("");
   const [selectedProject, setSelectedProject] = useState("");
@@ -98,11 +98,10 @@ export default function PomodoroTimerPage({ }) {
               <Timer className="w-5 h-5" />
             </div>
             <span
-              className={`text-xs font-medium ${activeTab === "timer" ? "text-orange-500" : "text-gray-500"
-                }`}
-            >
-
-            </span>
+              className={`text-xs font-medium ${
+                activeTab === "timer" ? "text-orange-500" : "text-gray-500"
+              }`}
+            ></span>
           </button>
 
           {/* Work Sessions Button */}
@@ -119,11 +118,10 @@ export default function PomodoroTimerPage({ }) {
               <List className="w-5 h-5" />
             </div>
             <span
-              className={`text-xs font-medium ${activeTab === "sessions" ? "text-orange-500" : "text-gray-500"
-                }`}
-            >
-
-            </span>
+              className={`text-xs font-medium ${
+                activeTab === "sessions" ? "text-orange-500" : "text-gray-500"
+              }`}
+            ></span>
           </button>
         </aside>
         {/* ================== MAIN CONTENT ================== */}
@@ -185,10 +183,7 @@ export default function PomodoroTimerPage({ }) {
               </>
 
               {/* Session Log */}
-              <div className="bg-white shadow-md border border-gray-200 p-6 rounded-lg w-full max-w-5xl">
-                <h4 className="text-md font-semibold mb-3 text-gray-900">
-                  Session Log
-                </h4>
+              <div className="bg-white shadow-md border border-orange-200 p-4 rounded-xl w-full max-w-5xl">
                 <SessionLog />
               </div>
             </main>
