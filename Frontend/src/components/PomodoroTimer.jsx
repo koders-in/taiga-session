@@ -58,7 +58,7 @@ export default function PomodoroTimer({
         }
         setIsBreak(false);
         setSecondsLeft(WORK_DEFAULT);
-        setRunning(true);
+        setRunning(false);
       } else {
         //  Work session ended
         if (onSessionComplete) onSessionComplete();
@@ -74,7 +74,7 @@ export default function PomodoroTimer({
         }
 
         setIsBreak(true);
-        setRunning(true);
+        setRunning(false);
         //  Break started send API
         try {
           startBreak(sessionId);
@@ -243,10 +243,10 @@ export default function PomodoroTimer({
   };
 
 
-  const handleComplete = async () => {
+  const handleComplete = async (auto = "False") => {
     try {
       if (sessionId) {
-        const res = await completeTimer(sessionId, noteText);
+        const res = await completeTimer(sessionId, noteText, auto);
         if (res?.success && noteText.trim()) {
           onAddNote(sessionId, noteText);
           setNoteText("");
@@ -269,7 +269,8 @@ export default function PomodoroTimer({
           console.error("[Frontend] Break end API failed:", err);
         }
         setIsBreak(false);
-        start();
+        setSecondsLeft(WORK_DEFAULT);  // reset timer to default work duration
+        setRunning(false);
       } else {
         if (onSessionComplete) onSessionComplete();
 
@@ -283,7 +284,8 @@ export default function PomodoroTimer({
 
         setIsBreak(true);
         setRunning(true);
-        //  Break started send API
+
+        // Break started send API
         try {
           startBreak(sessionId);
         } catch (err) {
@@ -468,10 +470,9 @@ export default function PomodoroTimer({
               </svg>
               Reset
             </button>
-
             <button
               className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-xl font-medium transition-colors"
-              onClick={handleComplete}
+              onClick={() => handleComplete()}   // no event object passed
               disabled={!running && secondsLeft === WORK_DEFAULT}
             >
               Complete
@@ -490,8 +491,7 @@ export default function PomodoroTimer({
               }
               setIsBreak(false);
               setSecondsLeft(WORK_DEFAULT);
-              setRunning(true);
-              start();
+              setRunning(false);
             }}
           >
             Skip Break
@@ -522,3 +522,4 @@ export default function PomodoroTimer({
     </div>
   );
 }
+

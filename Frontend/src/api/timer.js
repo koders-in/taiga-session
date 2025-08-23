@@ -104,12 +104,16 @@ export async function resetTimer(sessionId, note) {
 }
 
 
-export async function completeTimer(sessionId, note) {
+export async function completeTimer(sessionId, note, auto = "False") {
   const token = getToken();
   if (!token || !sessionId) {
     return { success: false, message: "Missing token or sessionId" };
   }
-  const payload = { note: note || "" };
+
+  const payload = {
+    auto, 
+    note: note || ""
+  };
 
   try {
     const res = await fetch(`${API_BASE}/complete/${sessionId}`, {
@@ -120,12 +124,14 @@ export async function completeTimer(sessionId, note) {
       },
       body: JSON.stringify(payload),
     });
+
     return await res.json();
   } catch (error) {
     console.error("Error completing timer:", error);
     return { success: false, message: "Request failed" };
   }
 }
+
 
 export async function startBreak() {
   const token = getToken();
